@@ -1,0 +1,12 @@
+name: Hearthstone
+main: name.richardson.james.hearthstone.Hearthstone
+database: true
+version: 1.0.0
+author: James Richardson (grandwazir)
+description: Easy Multiworld home
+website: https://github.com/grandwazir/DimensionDoor 
+commands:
+  home:
+    description: The main hearthstone command
+    usage: /home <set|teleport>
+    
