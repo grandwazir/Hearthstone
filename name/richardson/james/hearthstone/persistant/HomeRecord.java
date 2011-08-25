@@ -1,12 +1,14 @@
 
 package name.richardson.james.hearthstone.persistant;
 
+import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import name.richardson.james.hearthstone.Hearthstone;
 import name.richardson.james.hearthstone.exceptions.NoHomeFoundException;
@@ -17,6 +19,7 @@ import org.bukkit.entity.Player;
 
 import com.avaje.ebean.ExampleExpression;
 import com.avaje.ebean.LikeType;
+import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.validation.NotNull;
 
 @Entity()
@@ -28,9 +31,6 @@ public class HomeRecord {
 
   @NotNull
   private String createdBy;
-
-  @NotNull
-  private long lastAccessed;
 
   @NotNull
   private float pitch;
@@ -61,9 +61,8 @@ public class HomeRecord {
     record.setZ(location.getZ());
     record.setYaw(location.getYaw());
     record.setPitch(location.getPitch());
-    record.setLastAccessed(currentTime);
     record.setWorldUUID(player.getLocation().getWorld().getUID());
-    Hearthstone.getDb().save(record);
+    Hearthstone.getInstance().getDatabase().save(record);
     return record;
   }
 
@@ -77,29 +76,19 @@ public class HomeRecord {
     record.setZ(location.getZ());
     record.setYaw(location.getYaw());
     record.setPitch(location.getPitch());
-    record.setLastAccessed(currentTime);
     record.setWorldUUID(player.getLocation().getWorld().getUID());
-    Hearthstone.getDb().save(record);
+    Hearthstone.getInstance().getDatabase().save(record);
     return record;
   }
 
-  static public void destroy(final HomeRecord record) {
-    Hearthstone.getDb().delete(record);
+  public void destroy() {
+    // removing records using MySQL update as life is too short 
+    // to debug optimistic lock errors.
+    Hearthstone.getInstance().getDatabase().createSqlUpdate("DELETE from hearthstone_homes WHERE world_uuid='" + this.worldUUID + "' AND created_by='" + this.createdBy + "'").execute();
   }
 
   static public int destroy(final List<HomeRecord> records) {
     return Hearthstone.getDb().delete(records);
-  }
-
-  static public List<HomeRecord> find(final Player player) {
-    // create the example
-    final HomeRecord example = new HomeRecord();
-    example.setCreatedBy(player.getName());
-    example.setWorldUUID(player.getLocation().getWorld().getUID());
-    // create the example expression
-    final ExampleExpression expression = Hearthstone.getDb().getExpressionFactory().exampleLike(example, true, LikeType.EQUAL_TO);
-    // find and return all bans that match the expression
-    return Hearthstone.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findList();
   }
 
   static public HomeRecord findFirst(final Player player) throws NoHomeFoundException {
@@ -110,11 +99,9 @@ public class HomeRecord {
     // create the example expression
     final ExampleExpression expression = Hearthstone.getDb().getExpressionFactory().exampleLike(example, true, LikeType.EQUAL_TO);
     // find and return all bans that match the expression
-    try {
-      return Hearthstone.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findList().get(0);
-    } catch (final IndexOutOfBoundsException e) {
-      throw new NoHomeFoundException();
-    }
+    final HomeRecord record = Hearthstone.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findUnique();
+    if (record == null) throw new NoHomeFoundException();
+    return record;
   }
 
   static public HomeRecord findFirst(final String playerName, final UUID worldUUID) throws NoHomeFoundException {
@@ -138,10 +125,6 @@ public class HomeRecord {
 
   public String getCreatedBy() {
     return createdBy;
-  }
-
-  public long getLastAccessed() {
-    return lastAccessed;
   }
 
   public Location getLocation() {
@@ -181,10 +164,6 @@ public class HomeRecord {
     this.createdBy = createdBy;
   }
 
-  public void setLastAccessed(final long lastAccessed) {
-    this.lastAccessed = lastAccessed;
-  }
-
   public void setPitch(final float pitch) {
     this.pitch = pitch;
   }
@@ -208,5 +187,6 @@ public class HomeRecord {
   public void setZ(final double z) {
     this.z = z;
   }
+
 
 }

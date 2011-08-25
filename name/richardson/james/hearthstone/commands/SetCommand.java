@@ -8,6 +8,7 @@ import name.richardson.james.hearthstone.Hearthstone;
 import name.richardson.james.hearthstone.exceptions.CommandIsPlayerOnlyException;
 import name.richardson.james.hearthstone.exceptions.LocationBlockedException;
 import name.richardson.james.hearthstone.exceptions.LocationIsNotBuildableException;
+import name.richardson.james.hearthstone.exceptions.NoHomeFoundException;
 import name.richardson.james.hearthstone.exceptions.NotEnoughArgumentsException;
 import name.richardson.james.hearthstone.exceptions.PlayerNotAuthorisedException;
 import name.richardson.james.hearthstone.persistant.HomeRecord;
@@ -37,8 +38,14 @@ public class SetCommand extends Command {
     if (!plugin.isLocationBuildable(player, player.getLocation()))
       throw new LocationIsNotBuildableException();
 
-    // destroy the old home on this world if applicable
-    HomeRecord.destroy(HomeRecord.find(player));
+    // delete the old home on this world if applicable
+    try {
+      final HomeRecord record = HomeRecord.findFirst(player);
+      record.destroy();
+    } catch (NoHomeFoundException e) {
+      // do nothing we can ignore this exception safely.
+    }
+    
     HomeRecord.create(player);
     sender.sendMessage(ChatColor.GREEN + plugin.getMessage("SetCommandSuccessful"));
   }

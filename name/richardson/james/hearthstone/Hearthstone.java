@@ -80,9 +80,7 @@ public class Hearthstone extends JavaPlugin {
   public void checkPlayerCoolDown(final Player player) throws CooldownNotExpiredException {
     final String playerName = player.getName();
     final String node = getName().toLowerCase() + "." + messages.getString("CooldownPermission");
-    log(Level.INFO, node);
     if (cooldownList.containsKey(playerName) && player.hasPermission(node)) {
-      log(Level.INFO, cooldownList.get(playerName).toString());
       if (cooldownList.get(playerName) <= System.currentTimeMillis()) {
         cooldownList.remove(playerName);
       } else {
@@ -158,7 +156,7 @@ public class Hearthstone extends JavaPlugin {
 
   public void teleportHome(final HomeRecord home, final Player player) throws LocationBlockedException, CooldownNotExpiredException {
     if (isLocationBlocked(home.getLocation())) {
-      HomeRecord.destroy(home);
+      home.destroy();
       throw new LocationBlockedException();
     } else {
       checkPlayerCoolDown(player);
