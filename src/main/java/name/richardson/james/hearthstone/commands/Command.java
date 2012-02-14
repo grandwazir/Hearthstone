@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import name.richardson.james.hearthstone.Hearthstone;
+import name.richardson.james.hearthstone.HearthstoneOld;
 import name.richardson.james.hearthstone.exceptions.CommandIsPlayerOnlyException;
 import name.richardson.james.hearthstone.exceptions.CooldownNotExpiredException;
 import name.richardson.james.hearthstone.exceptions.LocationBlockedException;
@@ -29,10 +29,10 @@ public abstract class Command implements CommandExecutor {
   protected String description;
   protected String name;
   protected String permission;
-  protected Hearthstone plugin;
+  protected HearthstoneOld plugin;
   protected String usage;
 
-  public Command(final Hearthstone plugin) {
+  public Command(final HearthstoneOld plugin) {
     super();
     this.plugin = plugin;
     className = this.getClass().getSimpleName();

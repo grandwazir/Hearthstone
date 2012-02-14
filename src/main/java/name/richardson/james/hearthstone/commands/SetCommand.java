@@ -4,7 +4,7 @@ package name.richardson.james.hearthstone.commands;
 import java.util.List;
 import java.util.Map;
 
-import name.richardson.james.hearthstone.Hearthstone;
+import name.richardson.james.hearthstone.HearthstoneOld;
 import name.richardson.james.hearthstone.exceptions.CommandIsPlayerOnlyException;
 import name.richardson.james.hearthstone.exceptions.LocationBlockedException;
 import name.richardson.james.hearthstone.exceptions.LocationIsNotBuildableException;
@@ -21,7 +21,7 @@ import org.bukkit.permissions.PermissionDefault;
 
 public class SetCommand extends Command {
 
-  public SetCommand(final Hearthstone plugin) {
+  public SetCommand(final HearthstoneOld plugin) {
     super(plugin);
     registerPermission(permission, plugin.getMessage(className + "PermissionDescription"), PermissionDefault.TRUE);
   }

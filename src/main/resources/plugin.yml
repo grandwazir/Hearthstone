@@ -1,0 +1,7 @@
+name: ${project.name}
+description: ${project.description}
+version: ${project.version}
+author: James Richardson (grandwazir)
+website: https://github.com/grandwazir/${project.name} 
+main: name.richardson.james.hearthstone.Hearthstone
+    

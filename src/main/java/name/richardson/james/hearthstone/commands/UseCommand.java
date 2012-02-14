@@ -1,12 +1,10 @@
 
 package name.richardson.james.hearthstone.commands;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import name.richardson.james.hearthstone.Hearthstone;
+import name.richardson.james.hearthstone.HearthstoneOld;
 import name.richardson.james.hearthstone.exceptions.CommandIsPlayerOnlyException;
 import name.richardson.james.hearthstone.exceptions.CooldownNotExpiredException;
 import name.richardson.james.hearthstone.exceptions.LocationBlockedException;
@@ -21,11 +19,13 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
 
-public class TeleportCommand extends Command {
+public class UseCommand extends Command {
 
-  public TeleportCommand(final Hearthstone plugin) {
+  public UseCommand(final HearthstoneOld plugin) {
     super(plugin);
-    registerPermission(permission, plugin.getMessage(className + "PermissionDescription"), PermissionDefault.OP);
+    registerPermission(permission, plugin.getMessage(className + "PermissionDescription"), PermissionDefault.TRUE);
+    registerPermission(plugin.getName().toLowerCase() + "." + plugin.getMessage("CooldownPermission"), plugin.getMessage("CooldownPermissionDescription"),
+        PermissionDefault.TRUE);
   }
 
   @Override
@@ -33,37 +33,15 @@ public class TeleportCommand extends Command {
       NoHomeFoundException, LocationBlockedException, CooldownNotExpiredException {
     if (sender instanceof ConsoleCommandSender)
       throw new CommandIsPlayerOnlyException();
-    final UUID worldUUID;
     final Player player = (Player) sender;
-
-    if (arguments.containsKey("world")) {
-      worldUUID = plugin.getServer().getWorld(arguments.get("world")).getUID();
-    } else {
-      worldUUID = player.getLocation().getWorld().getUID();
-    }
-
-    final HomeRecord home = HomeRecord.findFirst(arguments.get("player"), worldUUID);
+    final HomeRecord home = HomeRecord.findFirst(player);
     plugin.teleportHome(home, player);
-    sender.sendMessage(String.format(ChatColor.GREEN + plugin.getMessage(className + "Successful"), arguments.get("player")));
+    sender.sendMessage(ChatColor.GREEN + plugin.getMessage(className + "Successful"));
   }
 
   @Override
   protected Map<String, String> parseArguments(final List<String> arguments) throws NotEnoughArgumentsException {
-    final Map<String, String> m = new HashMap<String, String>();
-
-    for (final String argument : arguments) {
-      if (argument.startsWith("p:")) {
-        m.put("player", argument.replace("p:", ""));
-      } else if (argument.startsWith("w:")) {
-        m.put("world", argument.replace("w:", ""));
-      }
-    }
-
-    if (!m.containsKey("player")) {
-      throw new NotEnoughArgumentsException();
-    } else {
-      return m;
-    }
+    return null;
   }
 
 }

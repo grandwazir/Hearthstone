@@ -1,16 +1,14 @@
 
 package name.richardson.james.hearthstone.persistant;
 
-import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
-import name.richardson.james.hearthstone.Hearthstone;
+import name.richardson.james.hearthstone.HearthstoneOld;
 import name.richardson.james.hearthstone.exceptions.NoHomeFoundException;
 
 import org.bukkit.Location;
@@ -19,7 +17,6 @@ import org.bukkit.entity.Player;
 
 import com.avaje.ebean.ExampleExpression;
 import com.avaje.ebean.LikeType;
-import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.validation.NotNull;
 
 @Entity()
@@ -62,7 +59,7 @@ public class HomeRecord {
     record.setYaw(location.getYaw());
     record.setPitch(location.getPitch());
     record.setWorldUUID(player.getLocation().getWorld().getUID());
-    Hearthstone.getInstance().getDatabase().save(record);
+    HearthstoneOld.getInstance().getDatabase().save(record);
     return record;
   }
 
@@ -77,18 +74,18 @@ public class HomeRecord {
     record.setYaw(location.getYaw());
     record.setPitch(location.getPitch());
     record.setWorldUUID(player.getLocation().getWorld().getUID());
-    Hearthstone.getInstance().getDatabase().save(record);
+    HearthstoneOld.getInstance().getDatabase().save(record);
     return record;
   }
 
   public void destroy() {
     // removing records using MySQL update as life is too short 
     // to debug optimistic lock errors.
-    Hearthstone.getInstance().getDatabase().createSqlUpdate("DELETE from hearthstone_homes WHERE world_uuid='" + this.worldUUID + "' AND created_by='" + this.createdBy + "'").execute();
+    HearthstoneOld.getInstance().getDatabase().createSqlUpdate("DELETE from hearthstone_homes WHERE world_uuid='" + this.worldUUID + "' AND created_by='" + this.createdBy + "'").execute();
   }
 
   static public int destroy(final List<HomeRecord> records) {
-    return Hearthstone.getDb().delete(records);
+    return HearthstoneOld.getDb().delete(records);
   }
 
   static public HomeRecord findFirst(final Player player) throws NoHomeFoundException {
@@ -97,9 +94,9 @@ public class HomeRecord {
     example.setCreatedBy(player.getName());
     example.setWorldUUID(player.getLocation().getWorld().getUID());
     // create the example expression
-    final ExampleExpression expression = Hearthstone.getDb().getExpressionFactory().exampleLike(example, true, LikeType.EQUAL_TO);
+    final ExampleExpression expression = HearthstoneOld.getDb().getExpressionFactory().exampleLike(example, true, LikeType.EQUAL_TO);
     // find and return all bans that match the expression
-    final HomeRecord record = Hearthstone.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findUnique();
+    final HomeRecord record = HearthstoneOld.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findUnique();
     if (record == null) throw new NoHomeFoundException();
     return record;
   }
@@ -110,10 +107,10 @@ public class HomeRecord {
     example.setCreatedBy(playerName);
     example.setWorldUUID(worldUUID);
     // create the example expression
-    final ExampleExpression expression = Hearthstone.getDb().getExpressionFactory().exampleLike(example, true, LikeType.EQUAL_TO);
+    final ExampleExpression expression = HearthstoneOld.getDb().getExpressionFactory().exampleLike(example, true, LikeType.EQUAL_TO);
     // find and return all bans that match the expression
     try {
-      return Hearthstone.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findList().get(0);
+      return HearthstoneOld.getDb().find(HomeRecord.class).where().add(expression).orderBy("created_at DESC").findList().get(0);
     } catch (final IndexOutOfBoundsException e) {
       throw new NoHomeFoundException();
     }
@@ -128,7 +125,7 @@ public class HomeRecord {
   }
 
   public Location getLocation() {
-    final World world = Hearthstone.getInstance().getServer().getWorld(worldUUID);
+    final World world = HearthstoneOld.getInstance().getServer().getWorld(worldUUID);
     return new Location(world, x, y, z, yaw, pitch);
   }
 

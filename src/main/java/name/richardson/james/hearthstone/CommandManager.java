@@ -14,7 +14,7 @@ public class CommandManager implements CommandExecutor {
   private final HashMap<String, CommandExecutor> commands = new HashMap<String, CommandExecutor>();
   private final UseCommand defaultCommand;
 
-  public CommandManager(final Hearthstone plugin) {
+  public CommandManager(final HearthstoneOld plugin) {
     super();
     defaultCommand = new UseCommand(plugin);
   }

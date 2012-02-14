@@ -34,13 +34,13 @@ import com.avaje.ebean.EbeanServer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 
-public class Hearthstone extends JavaPlugin {
+public class HearthstoneOld extends JavaPlugin {
 
   public static ResourceBundle messages;
   private final static File confFile = new File("plugins/Hearthstone/config.yml");
 
   private static EbeanServer db;
-  private static Hearthstone instance;
+  private static HearthstoneOld instance;
 
   private final static Locale locale = Locale.getDefault();
   private final static Logger logger = Logger.getLogger("Minecraft");
@@ -53,13 +53,13 @@ public class Hearthstone extends JavaPlugin {
   private PluginManager pm;
   private GlobalRegionManager worldGuardRegionManager;
 
-  public Hearthstone() {
-    Hearthstone.instance = this;
+  public HearthstoneOld() {
+    HearthstoneOld.instance = this;
     if (messages == null) {
       try {
-        Hearthstone.messages = ResourceBundle.getBundle("name.richardson.james.hearthstone.localisation.Messages", locale);
+        HearthstoneOld.messages = ResourceBundle.getBundle("name.richardson.james.hearthstone.localisation.Messages", locale);
       } catch (final MissingResourceException e) {
-        Hearthstone.messages = ResourceBundle.getBundle("name.richardson.james.hearthstone.localisation.Messages");
+        HearthstoneOld.messages = ResourceBundle.getBundle("name.richardson.james.hearthstone.localisation.Messages");
         log(Level.WARNING, String.format(messages.getString("noLocalisationFound"), locale.getDisplayLanguage()));
       }
     }
@@ -69,7 +69,7 @@ public class Hearthstone extends JavaPlugin {
     return db;
   }
 
-  public static Hearthstone getInstance() {
+  public static HearthstoneOld getInstance() {
     return instance;
   }
 
