@@ -68,8 +68,8 @@ public class TeleportCommand extends PluginCommand {
     
     // if the player has to obey the cooldown check to see if they are allowed to teleport
     final String key = player.getName().toLowerCase();
-    if (sender.hasPermission(this.getPermission(3)) && cooldown.containsKey(key)) {
-      long timeLeft = System.currentTimeMillis() - cooldown.get(key);
+    if (!sender.hasPermission(this.getPermission(2)) && cooldown.containsKey(key)) {
+      long timeLeft = cooldown.get(key) - System.currentTimeMillis();
       // if the cooldown has not expired, block them from teleporting
       if (timeLeft > 0) {
         throw new CommandUsageException(String.format(plugin.getMessage("teleportcommand-cooldown-not-expired"), TimeFormatter.millisToLongDHMS(timeLeft)));
@@ -81,17 +81,15 @@ public class TeleportCommand extends PluginCommand {
     // if the player is attempting to teleport themselves
     if (getArguments().isEmpty()) {
       if (sender.hasPermission(this.getPermission(1))) {
-        List<HomeRecord> homes = database.findHomeRecordsByOwner(sender.getName());
-        // find the first home matching this world and teleport them
-        // TODO: allow for multiple homes per world.
-        for (HomeRecord record : homes) {
-          if (record.getWorldUUID().toString().equalsIgnoreCase(player.getWorld().getUID().toString())) {
-            cooldown.put(sender.getName().toLowerCase(), cooldownTime);
-            player.teleport(record.getLocation(server));
-            return;
-          }
+        final UUID worldUUID = player.getWorld().getUID();
+        List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(sender.getName(), worldUUID);
+        if (!homes.isEmpty()) {
+          cooldown.put(sender.getName().toLowerCase(), cooldownTime);
+          player.teleport(homes.get(0).getLocation(server));
+          return;
+        } else {
+          throw new CommandUsageException(plugin.getMessage("teleportcommand-no-home-set"));
         }
-        throw new CommandUsageException(plugin.getMessage("teleportcommand-no-home-set"));
       } else {
         throw new CommandPermissionException(null, this.getPermission(1));
       }
@@ -101,21 +99,18 @@ public class TeleportCommand extends PluginCommand {
     final UUID worldUUID = (UUID) this.getArguments().get("worldId");
 
     // if the player is attempting to teleport themselves to another player's home
-    if (sender.hasPermission(this.getPermission(2))) {
-      List<HomeRecord> homes = database.findHomeRecordsByOwner(playerName);
-      // find the first home matching this world and teleport them
-      // TODO: allow for multiple homes per world.
-      for (HomeRecord record : homes) {
-        if (record.getWorldUUID().toString().equalsIgnoreCase(worldUUID.toString())) {
-          cooldown.put(sender.getName().toLowerCase(), cooldownTime);
-          player.teleport(record.getLocation(server));
-          sender.sendMessage(String.format(ChatColor.GREEN + this.plugin.getMessage("teleportcommand-teleported-to-home"), playerName));
-          return;
-        }
+    if (sender.hasPermission(this.getPermission(3))) {
+      List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(playerName, worldUUID);
+      if (!homes.isEmpty()) {
+        cooldown.put(sender.getName().toLowerCase(), cooldownTime);
+        player.teleport(homes.get(0).getLocation(server));
+        sender.sendMessage(String.format(ChatColor.GREEN + this.plugin.getMessage("teleportcommand-teleported-to-home"), playerName));
+        return;
+      } else {
+        throw new CommandUsageException(String.format(plugin.getMessage("teleportcommand-no-home-set-for-player"), playerName));
       }
-      throw new CommandUsageException(String.format(plugin.getMessage("teleportcommand-no-home-set-for-player"), playerName));
     } else {
-      throw new CommandPermissionException(plugin.getMessage("teleportcommand-hint-own-home-only"), this.getPermission(2));
+      throw new CommandPermissionException(plugin.getMessage("teleportcommand-hint-own-home-only"), this.getPermission(3));
     }
     
   }

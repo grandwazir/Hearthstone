@@ -3,6 +3,7 @@ package name.richardson.james.hearthstone.general;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -82,6 +83,7 @@ public class SetCommand extends PluginCommand {
     final Player player = (Player) sender;
     final String playerName = (String) ((this.getArguments().containsKey("player")) ? this.getArguments().get("player") : player.getName());
     final Location location = player.getLocation();
+    final UUID worldUUID = location.getWorld().getUID();
     
     // check if we are allowed to set the home for..
     if (player.getName().equalsIgnoreCase(playerName)) {
@@ -98,14 +100,7 @@ public class SetCommand extends PluginCommand {
     // check to see if the player can build in that location
     if (!isPlayerAllowedToBuild(location)) throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-not-buildable"));
     
-    final List<HomeRecord> homes = database.findHomeRecordsByOwner(playerName);
-    // find any homes owned by this player in this world and delete them
-    // TODO: allow for multiple homes per world.
-    for (HomeRecord record : homes) {
-      if (record.getWorldUUID().toString().equalsIgnoreCase(location.getWorld().getUID().toString())) {
-        database.delete(record);
-      }
-    }
+    database.deleteHomes(playerName, worldUUID);
     
     // create a new home
     this.createHome(playerName, location);

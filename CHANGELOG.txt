@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.0.1-SNAPSHOT)
 
+2012-02-16 02:02:16 +0000    big ugly commit (James Richardson)
 2012-02-14 03:54:14 +0000    converted to use Maven (James Richardson)
 2011-08-25 22:15:22 +0100    - Workaround for database locking exception when using MySQL (James Richardson)
 2011-08-25 19:29:06 +0100    - initial commit (James Richardson)

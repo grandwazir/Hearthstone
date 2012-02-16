@@ -63,7 +63,9 @@ public class Hearthstone extends SimplePlugin {
     this.commandManager = new CommandManager(this);
     this.getCommand("hs").setExecutor(this.commandManager);
     this.commandManager.addCommand(new SetCommand(this));
-    this.commandManager.addCommand(new TeleportCommand(this));
+    TeleportCommand command = new TeleportCommand(this);
+    this.commandManager.addCommand(command);
+    this.getCommand("home").setExecutor(command);
   }
 
   private void setupDatabase() throws SQLException {
@@ -74,6 +76,7 @@ public class Hearthstone extends SimplePlugin {
       this.installDDL();
     }
     this.database = new DatabaseHandler(this.getDatabase());
+    this.logger.info(String.format(this.getMessage("homes-loaded"), this.database.count(HomeRecord.class)));
   }
 
   public HearthstoneConfiguration getHearthstoneConfiguration() {
