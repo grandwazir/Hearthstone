@@ -59,7 +59,6 @@ public class Hearthstone extends SimplePlugin {
   @Override
   public void onEnable() {
     try {
-      Logger.setDebugging(this, true);
       this.setLoggerPrefix();
       this.loadConfiguration();
       this.setRootPermission();
