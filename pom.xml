@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>name.richardson.james.bukkit</groupId>
   <artifactId>hearthstone</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1-SNAPSHOT</version>
   <name>Hearthstone</name>
   <description>A simple plugin to provide multiworld homes</description>
 
