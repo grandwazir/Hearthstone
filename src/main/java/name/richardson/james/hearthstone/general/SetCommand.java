@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2012 James Richardson.
+ * 
+ * SetCommand.java is part of Hearthstone.
+ * 
+ * Hearthstone is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * Hearthstone is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Hearthstone. If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
 import java.util.HashMap;
@@ -34,7 +52,92 @@ public class SetCommand extends PluginCommand {
     // register permissions
     this.registerPermissions();
   }
-  
+
+  public void createHome(String playerName, Location location) {
+    final HomeRecord record = new HomeRecord();
+    record.setCreatedAt(System.currentTimeMillis());
+    record.setCreatedBy(playerName);
+    record.setX(location.getX());
+    record.setY(location.getY());
+    record.setZ(location.getZ());
+    record.setYaw(location.getYaw());
+    record.setPitch(location.getPitch());
+    record.setWorldUUID(location.getWorld().getUID());
+    database.save(record);
+  }
+
+  public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
+    // do not allow ConsoleCommandSenders to use this command
+    if (sender instanceof ConsoleCommandSender)
+      throw new CommandUsageException(this.plugin.getMessage("command-is-player-only"));
+
+    // if the playerName is provided use that otherwise get it from the sender's
+    // name
+    final Player player = (Player) sender;
+    final String playerName = (String) ((this.getArguments().containsKey("player")) ? this.getArguments().get("player") : player.getName());
+    final Location location = player.getLocation();
+    final UUID worldUUID = location.getWorld().getUID();
+
+    // check if we are allowed to set the home for..
+    if (player.getName().equalsIgnoreCase(playerName)) {
+      // ourselves
+      if (!player.hasPermission(this.getPermission(1)))
+        throw new CommandPermissionException(plugin.getMessage("command-not-permitted"), this.getPermission(1));
+    } else {
+      // others
+      if (!player.hasPermission(this.getPermission(2)))
+        throw new CommandPermissionException(plugin.getMessage("command-not-permitted"), this.getPermission(2));
+    }
+
+    // check to see if the location is blocked
+    if (isLocationObstructed(location))
+      throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-obstructed"));
+
+    // check to see if the player can build in that location
+    if (!isPlayerAllowedToBuild(location))
+      throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-not-buildable"));
+
+    database.deleteHomes(playerName, worldUUID);
+
+    // create a new home
+    this.createHome(playerName, location);
+    sender.sendMessage(ChatColor.GREEN + this.plugin.getMessage("setcommand-home-set"));
+
+  }
+
+  public void parseArguments(List<String> arguments, CommandSender sender) throws CommandArgumentException {
+    final Map<String, Object> map = new HashMap<String, Object>();
+
+    // if the arguments are empty do nothing and assume the user is setting
+    // their own home.
+    if (!arguments.isEmpty()) {
+      // otherwise assume the player wants to set the home of another player
+      final String playerName = matchPlayerName(arguments.remove(0));
+      map.put("player", playerName);
+    }
+
+    // set the arguments
+    this.setArguments(map);
+  }
+
+  private boolean isLocationObstructed(Location location) {
+    return false;
+  }
+
+  private boolean isPlayerAllowedToBuild(Location location) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  private String matchPlayerName(String playerName) {
+    List<Player> matches = this.server.matchPlayer(playerName);
+    if (matches.isEmpty()) {
+      return playerName;
+    } else {
+      return matches.get(0).getName();
+    }
+  }
+
   private void registerPermissions() {
     final String prefix = plugin.getDescription().getName().toLowerCase() + ".";
     final String wildcardDescription = String.format(plugin.getMessage("wildcard-permission-description"), this.getName());
@@ -50,84 +153,6 @@ public class SetCommand extends PluginCommand {
     Permission others = new Permission(prefix + this.getName() + "." + plugin.getMessage("setcommand-others-permission-name"), plugin.getMessage("setcommand-others-permission-description"), PermissionDefault.OP);
     others.addParent(wildcard, true);
     this.addPermission(others);
-  }
-
-  public void parseArguments(List<String> arguments, CommandSender sender) throws CommandArgumentException {
-    final Map<String, Object> map = new HashMap<String, Object>();
-    
-    // if the arguments are empty do nothing and assume the user is setting their own home.
-    if (!arguments.isEmpty()) {
-      // otherwise assume the player wants to set the home of another player
-      final String playerName = matchPlayerName(arguments.remove(0));
-      map.put("player", playerName);
-    }
-    
-    // set the arguments
-    this.setArguments(map);
-  }
-
-  private String matchPlayerName(String playerName) {
-    List<Player> matches = this.server.matchPlayer(playerName);
-    if (matches.isEmpty()) {
-      return playerName;
-    } else {
-      return matches.get(0).getName();
-    }
-  }
-
-  public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
-    // do not allow ConsoleCommandSenders to use this command
-    if (sender instanceof ConsoleCommandSender) throw new CommandUsageException(this.plugin.getMessage("command-is-player-only"));
-    
-    // if the playerName is provided use that otherwise get it from the sender's name
-    final Player player = (Player) sender;
-    final String playerName = (String) ((this.getArguments().containsKey("player")) ? this.getArguments().get("player") : player.getName());
-    final Location location = player.getLocation();
-    final UUID worldUUID = location.getWorld().getUID();
-    
-    // check if we are allowed to set the home for..
-    if (player.getName().equalsIgnoreCase(playerName)) {
-      // ourselves
-      if (!player.hasPermission(this.getPermission(1))) throw new CommandPermissionException(plugin.getMessage("command-not-permitted"), this.getPermission(1));
-    } else {
-      // others
-      if (!player.hasPermission(this.getPermission(2))) throw new CommandPermissionException(plugin.getMessage("command-not-permitted"), this.getPermission(2));
-    }
-    
-    // check to see if the location is blocked
-    if (isLocationObstructed(location)) throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-obstructed"));
-    
-    // check to see if the player can build in that location
-    if (!isPlayerAllowedToBuild(location)) throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-not-buildable"));
-    
-    database.deleteHomes(playerName, worldUUID);
-    
-    // create a new home
-    this.createHome(playerName, location);
-    sender.sendMessage(ChatColor.GREEN + this.plugin.getMessage("setcommand-home-set"));
-    
-  }
-  
-  public void createHome(String playerName, Location location) {
-    final HomeRecord record = new HomeRecord();
-    record.setCreatedAt(System.currentTimeMillis());
-    record.setCreatedBy(playerName);
-    record.setX(location.getX());
-    record.setY(location.getY());
-    record.setZ(location.getZ());
-    record.setYaw(location.getYaw());
-    record.setPitch(location.getPitch());
-    record.setWorldUUID(location.getWorld().getUID());
-    database.save(record);
-  }
-  
-  private boolean isPlayerAllowedToBuild(Location location) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  private boolean isLocationObstructed(Location location) {
-    return false;
   }
 
 }

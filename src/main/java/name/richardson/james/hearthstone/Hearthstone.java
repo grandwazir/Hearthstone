@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2012 James Richardson.
+ * 
+ * Hearthstone.java is part of Hearthstone.
+ * 
+ * Hearthstone is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * Hearthstone is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Hearthstone. If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package name.richardson.james.hearthstone;
 
 import java.io.IOException;
@@ -34,6 +52,10 @@ public class Hearthstone extends SimplePlugin {
     return this.database;
   }
 
+  public HearthstoneConfiguration getHearthstoneConfiguration() {
+    return this.configuration;
+  }
+
   @Override
   public void onEnable() {
     try {
@@ -59,6 +81,12 @@ public class Hearthstone extends SimplePlugin {
     this.logger.info(String.format(this.getMessage("plugin-enabled"), this.getDescription().getName()));
   }
 
+  private void loadConfiguration() throws IOException {
+    this.configuration = new HearthstoneConfiguration(this);
+    if (configuration.isDebugging())
+      Logger.setDebugging(this, true);
+  }
+
   private void registerCommands() {
     this.commandManager = new CommandManager(this);
     this.getCommand("hs").setExecutor(this.commandManager);
@@ -77,15 +105,6 @@ public class Hearthstone extends SimplePlugin {
     }
     this.database = new DatabaseHandler(this.getDatabase());
     this.logger.info(String.format(this.getMessage("homes-loaded"), this.database.count(HomeRecord.class)));
-  }
-
-  public HearthstoneConfiguration getHearthstoneConfiguration() {
-    return this.configuration;
-  }
-  
-  private void loadConfiguration() throws IOException {
-    this.configuration = new HearthstoneConfiguration(this);
-    if (configuration.isDebugging()) Logger.setDebugging(this, true);
   }
 
 }
