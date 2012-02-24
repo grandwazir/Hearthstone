@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.1.2-SNAPSHOT)
 
+2012-02-24 19:30:17 +0000    fix issue where we were modifying the location before it was saved (James Richardson)
 2012-02-24 19:12:04 +0000    added obstruction check to teleport command (James Richardson)
 2012-02-24 19:09:19 +0000    added obstruction checks and hook for WorldGuard (James Richardson)
 2012-02-24 18:10:19 +0000    fix bug where /home set not working correctly (James Richardson)
