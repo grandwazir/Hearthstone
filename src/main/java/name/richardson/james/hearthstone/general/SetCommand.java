@@ -20,6 +20,9 @@ package name.richardson.james.hearthstone.general;
 
 import java.util.List;
 
+import com.sk89q.worldguard.protection.GlobalRegionManager;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -47,8 +50,14 @@ public class SetCommand extends PluginCommand {
   /** The location of the home */
   private Location location;
   
+  private final GlobalRegionManager manager;
+  
+  /** The player who is setting the home */
+  private Player player;
+  
   public SetCommand(Hearthstone plugin) {
     super(plugin);
+    this.manager = plugin.getGlobalRegionManager();
     this.server = plugin.getServer();
     this.database = plugin.getDatabaseHandler();
     this.registerPermissions();
@@ -56,9 +65,9 @@ public class SetCommand extends PluginCommand {
 
   private void createHome() throws CommandUsageException {
     // check if location is obstructed
-    if (isLocationObstructed(location)) throw new CommandUsageException(this.plugin.getMessage("location-obstructed"));
+    if (isLocationObstructed()) throw new CommandUsageException(this.plugin.getMessage("location-is-obstructed"));
     // check if the location is buildable
-    if (!isPlayerAllowedToBuild(location)) throw new CommandUsageException(this.plugin.getMessage("not-allowed-to-build-here"));
+    if (!isPlayerAllowedToBuild()) throw new CommandUsageException(this.plugin.getMessage("not-allowed-to-build-here"));
     // delete any existing homes
     database.deleteHomes(playerName, location.getWorld().getUID());
     // create the home
@@ -94,12 +103,22 @@ public class SetCommand extends PluginCommand {
 
   }
 
-  private boolean isLocationObstructed(Location location) {
+  private boolean isLocationObstructed() {
+    int i = 0;
+    while (i < 2) {
+      player.sendMessage(location.add(0, i, 0).getBlock().getType().toString());
+      if (!location.add(0, i, 0).getBlock().isEmpty()) return true;
+      i++;
+    }
     return false;
   }
 
-  private boolean isPlayerAllowedToBuild(Location location) {
-    return true;
+  private boolean isPlayerAllowedToBuild() {
+    if (this.manager != null) {
+      return manager.canBuild(this.player, this.location);
+    } else {
+      return true;
+    }
   }
 
   private String matchPlayerName(String playerName) {
@@ -130,6 +149,8 @@ public class SetCommand extends PluginCommand {
 
   
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
+    this.player = (Player) sender;
+    
     if (arguments.length == 0) {
       this.playerName = sender.getName(); 
     } else {

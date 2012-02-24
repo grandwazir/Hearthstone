@@ -53,6 +53,11 @@
       <id>my-repo</id>
       <url>http://repository.james.richardson.name</url>
     </repository>  
+    <!-- sk89q's repository -->    
+    <repository>
+      <id>sk89q-mvn2</id>
+      <url>http://mvn2.sk89q.com/repo</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -70,6 +75,11 @@
 	   <groupId>name.richardson.james.bukkit</groupId>
 	   <artifactId>alias</artifactId>
 	   <version>1.0.0</version>
+     </dependency>
+     <dependency>
+           <groupId>com.sk89q</groupId>
+           <artifactId>worldguard</artifactId>
+           <version>5.4</version>
      </dependency>
   </dependencies>
 

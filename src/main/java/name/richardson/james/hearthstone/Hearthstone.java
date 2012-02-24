@@ -26,6 +26,12 @@ import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.GlobalRegionManager;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+
+import org.bukkit.World;
+
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.internals.Logger;
 import name.richardson.james.bukkit.utilities.plugin.SimplePlugin;
@@ -39,6 +45,8 @@ public class Hearthstone extends SimplePlugin {
   private DatabaseHandler database;
   private HearthstoneConfiguration configuration;
   private final Map<String, Long> cooldown = new HashMap<String, Long>();
+  
+  private WorldGuardPlugin worldGuard;
 
   public Map<String, Long> getCooldownTracker() {
     return this.cooldown;
@@ -65,6 +73,7 @@ public class Hearthstone extends SimplePlugin {
       this.loadConfiguration();
       this.setRootPermission();
       this.setupDatabase();
+      this.connectToWorldGuard();
       this.registerCommands();
     } catch (final IOException e) {
       this.logger.severe("Unable to close file stream!");
@@ -79,6 +88,21 @@ public class Hearthstone extends SimplePlugin {
       }
     }
     this.logger.info(this.getSimpleFormattedMessage("plugin-enabled", this.getDescription().getName()));
+  }
+  
+  public GlobalRegionManager getGlobalRegionManager() {
+    if (this.worldGuard != null) {
+      return this.worldGuard.getGlobalRegionManager();
+    } else {
+      return null;
+    }
+  }
+
+  private void connectToWorldGuard() {
+    this.worldGuard = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
+    if (this.worldGuard != null) {
+      this.logger.info(this.getSimpleFormattedMessage("worldguard-hooked", this.worldGuard.getDescription().getFullName()));
+    }
   }
 
   private void loadConfiguration() throws IOException {
