@@ -20,6 +20,7 @@ package name.richardson.james.hearthstone;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ChoiceFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +104,14 @@ public class Hearthstone extends SimplePlugin {
       this.installDDL();
     }
     this.database = new DatabaseHandler(this.getDatabase());
-    this.logger.info(String.format(this.getMessage("homes-loaded"), this.database.count(HomeRecord.class)));
+    this.logger.info(this.getFormattedHomeCount(database.count(HomeRecord.class)));
+  }
+
+  private String getFormattedHomeCount(int count) {
+    Object[] arguments = {count};
+    double[] limits = {0, 1, 2};
+    String[] formats = {this.getMessage("no-homes"), this.getMessage("one-home"), this.getMessage("many-homes")};
+    return this.getChoiceFormattedMessage("homes-loaded", arguments, formats, limits);
   }
 
 }

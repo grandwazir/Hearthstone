@@ -18,16 +18,12 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -44,16 +40,28 @@ public class SetCommand extends PluginCommand {
 
   private final Server server;
   private final DatabaseHandler database;
+  
+  /** The name of the players home we are setting */
+  private String playerName;
 
+  /** The location of the home */
+  private Location location;
+  
   public SetCommand(Hearthstone plugin) {
-    super(plugin, plugin.getMessage("setcommand-name"), plugin.getMessage("setcommand-description"), plugin.getMessage("setcommand-usage"));
+    super(plugin);
     this.server = plugin.getServer();
     this.database = plugin.getDatabaseHandler();
-    // register permissions
     this.registerPermissions();
   }
 
-  public void createHome(String playerName, Location location) {
+  private void createHome() throws CommandUsageException {
+    // check if location is obstructed
+    if (isLocationObstructed(location)) throw new CommandUsageException(this.plugin.getMessage("location-obstructed"));
+    // check if the location is buildable
+    if (!isPlayerAllowedToBuild(location)) throw new CommandUsageException(this.plugin.getMessage("not-allowed-to-build-here"));
+    // delete any existing homes
+    database.deleteHomes(playerName, location.getWorld().getUID());
+    // create the home
     final HomeRecord record = new HomeRecord();
     record.setCreatedAt(System.currentTimeMillis());
     record.setCreatedBy(playerName);
@@ -67,57 +75,22 @@ public class SetCommand extends PluginCommand {
   }
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
-    // do not allow ConsoleCommandSenders to use this command
-    if (sender instanceof ConsoleCommandSender)
-      throw new CommandUsageException(this.plugin.getMessage("command-is-player-only"));
-
-    // if the playerName is provided use that otherwise get it from the sender's
-    // name
-    final Player player = (Player) sender;
-    final String playerName = (String) ((this.getArguments().containsKey("player")) ? this.getArguments().get("player") : player.getName());
-    final Location location = player.getLocation();
-    final UUID worldUUID = location.getWorld().getUID();
-
-    // check if we are allowed to set the home for..
-    if (player.getName().equalsIgnoreCase(playerName)) {
-      // ourselves
-      if (!player.hasPermission(this.getPermission(1)))
-        throw new CommandPermissionException(plugin.getMessage("command-not-permitted"), this.getPermission(1));
+    this.location = ((Player) sender).getLocation(); 
+    
+    if (sender.hasPermission(this.getPermission(1)) && this.playerName.equalsIgnoreCase(sender.getName())) {
+      this.createHome();
+      sender.sendMessage(ChatColor.GREEN + this.plugin.getMessage("home-set"));
     } else {
-      // others
-      if (!player.hasPermission(this.getPermission(2)))
-        throw new CommandPermissionException(plugin.getMessage("command-not-permitted"), this.getPermission(2));
+      throw new CommandPermissionException(null, this.getPermission(1));
+    }
+    
+    if (sender.hasPermission(this.getPermission(2)) && !this.playerName.equalsIgnoreCase(sender.getName())) {
+      this.createHome();
+      sender.sendMessage(ChatColor.GREEN + this.plugin.getSimpleFormattedMessage("home-set-others", this.playerName));
+    } else {
+      throw new CommandPermissionException(null, this.getPermission(2));
     }
 
-    // check to see if the location is blocked
-    if (isLocationObstructed(location))
-      throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-obstructed"));
-
-    // check to see if the player can build in that location
-    if (!isPlayerAllowedToBuild(location))
-      throw new CommandUsageException(this.plugin.getMessage("setcommand-location-is-not-buildable"));
-
-    database.deleteHomes(playerName, worldUUID);
-
-    // create a new home
-    this.createHome(playerName, location);
-    sender.sendMessage(ChatColor.GREEN + this.plugin.getMessage("setcommand-home-set"));
-
-  }
-
-  public void parseArguments(List<String> arguments, CommandSender sender) throws CommandArgumentException {
-    final Map<String, Object> map = new HashMap<String, Object>();
-
-    // if the arguments are empty do nothing and assume the user is setting
-    // their own home.
-    if (!arguments.isEmpty()) {
-      // otherwise assume the player wants to set the home of another player
-      final String playerName = matchPlayerName(arguments.remove(0));
-      map.put("player", playerName);
-    }
-
-    // set the arguments
-    this.setArguments(map);
   }
 
   private boolean isLocationObstructed(Location location) {
@@ -125,7 +98,6 @@ public class SetCommand extends PluginCommand {
   }
 
   private boolean isPlayerAllowedToBuild(Location location) {
-    // TODO Auto-generated method stub
     return true;
   }
 
@@ -154,5 +126,17 @@ public class SetCommand extends PluginCommand {
     others.addParent(wildcard, true);
     this.addPermission(others);
   }
+
+  
+  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
+    if (arguments.length == 0) {
+      this.playerName = sender.getName(); 
+    } else {
+      this.playerName = matchPlayerName(arguments[0]);
+    }
+  }
+
+  
+
 
 }

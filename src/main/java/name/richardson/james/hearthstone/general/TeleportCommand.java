@@ -18,7 +18,6 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,7 +26,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -46,110 +44,72 @@ public class TeleportCommand extends PluginCommand {
 
   private final Server server;
   private final DatabaseHandler database;
-  private final Map<String, Long> cooldown;
+  private final Map<String, Long> cooldownTracker;
   private final HearthstoneConfiguration configuration;
+  
+  //* The name of the player we are teleporting to *//
+  private String playerName;
+  
+  //* The UID of the world we are teleporting to *//
+  private UUID worldUUID;
+  
+  //* The player who is teleporting *//
+  private Player player;
+  
+  //* The cooldown to apply to the teleporting player *//
+  private long cooldown;
 
   public TeleportCommand(Hearthstone plugin) {
-    super(plugin, plugin.getMessage("teleportcommand-name"), plugin.getMessage("teleportcommand-description"), plugin.getMessage("teleportcommand-usage"));
+    super(plugin);
     this.server = plugin.getServer();
     this.database = plugin.getDatabaseHandler();
-    this.cooldown = plugin.getCooldownTracker();
+    this.cooldownTracker = plugin.getCooldownTracker();
     this.configuration = plugin.getHearthstoneConfiguration();
+    this.cooldown = plugin.getHearthstoneConfiguration().getCooldown();
     this.registerPermissions();
   }
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
-    final Player player = (Player) sender;
-    final long cooldownTime = System.currentTimeMillis() + this.configuration.getCooldown();
+    final String senderName = sender.getName().toLowerCase();
 
-    // if the player has to obey the cooldown check to see if they are allowed
-    // to teleport
-    final String key = player.getName().toLowerCase();
-    if (!sender.hasPermission(this.getPermission(2)) && cooldown.containsKey(key)) {
-      long timeLeft = cooldown.get(key) - System.currentTimeMillis();
-      // if the cooldown has not expired, block them from teleporting
-      if (timeLeft > 0) {
-        throw new CommandUsageException(String.format(plugin.getMessage("teleportcommand-cooldown-not-expired"), TimeFormatter.millisToLongDHMS(timeLeft)));
-      } else {
-        cooldown.remove(key);
-      }
+    if (!isPlayerCooldownExpired() && !player.hasPermission(this.getPermission(2))) {
+      throw new CommandUsageException(String.format(plugin.getMessage("cooldown-not-expired"), TimeFormatter.millisToLongDHMS(cooldownTracker.get(senderName))));
     }
-
-    // if the player is attempting to teleport themselves
-    if (getArguments().isEmpty()) {
-      if (sender.hasPermission(this.getPermission(1))) {
-        final UUID worldUUID = player.getWorld().getUID();
-        List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(sender.getName(), worldUUID);
-        if (!homes.isEmpty()) {
-          cooldown.put(sender.getName().toLowerCase(), cooldownTime);
-          player.teleport(homes.get(0).getLocation(server));
-          return;
-        } else {
-          throw new CommandUsageException(plugin.getMessage("teleportcommand-no-home-set"));
-        }
-      } else {
-        throw new CommandPermissionException(null, this.getPermission(1));
-      }
-    }
-
-    final String playerName = (String) this.getArguments().get("player");
-    final UUID worldUUID = (UUID) this.getArguments().get("worldId");
-
-    // if the player is attempting to teleport themselves to another player's
-    // home
-    if (sender.hasPermission(this.getPermission(3))) {
-      List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(playerName, worldUUID);
-      if (!homes.isEmpty()) {
-        cooldown.put(sender.getName().toLowerCase(), cooldownTime);
-        player.teleport(homes.get(0).getLocation(server));
-        sender.sendMessage(String.format(ChatColor.GREEN + this.plugin.getMessage("teleportcommand-teleported-to-home"), playerName));
-        return;
-      } else {
-        throw new CommandUsageException(String.format(plugin.getMessage("teleportcommand-no-home-set-for-player"), playerName));
-      }
+    
+    if (sender.hasPermission(this.getPermission(1)) && senderName.equalsIgnoreCase(playerName)) {
+      teleportPlayer();
+      return;
+    } else if (sender.hasPermission(this.getPermission(3)) && !senderName.equalsIgnoreCase(playerName)) {
+      teleportPlayer();
+      sender.sendMessage(String.format(ChatColor.GREEN + this.plugin.getSimpleFormattedMessage("teleported-home", playerName)));
     } else {
-      throw new CommandPermissionException(plugin.getMessage("teleportcommand-hint-own-home-only"), this.getPermission(3));
+      throw new CommandPermissionException(plugin.getMessage("can-only-teleport-to-own-home"), this.getPermission(3));
     }
 
   }
 
-  public void parseArguments(List<String> arguments, CommandSender sender) throws CommandArgumentException {
-    final Map<String, Object> map = new HashMap<String, Object>();
+  private boolean isPlayerCooldownExpired() {
+    
+    if (!cooldownTracker.containsKey(playerName)) return true;
+    
+    final String playerName = player.getName().toLowerCase();
+    final long cooldown = cooldownTracker.get(playerName);
+    
+    if ((System.currentTimeMillis() - cooldown) > 0) return false;
+    
+    cooldownTracker.remove(playerName);
+    return true;
+      
+  }
 
-    // do not allow ConsoleCommandSenders to use this command
-    if (sender instanceof ConsoleCommandSender) {
-      throw new CommandArgumentException(this.plugin.getMessage("command-is-player-only"), this.plugin.getMessage("teleportcomnmand-teleport-self-only"));
+  private void teleportPlayer() throws CommandUsageException {
+    List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(playerName, worldUUID);
+    if (!homes.isEmpty()) {
+      cooldownTracker.put(playerName, cooldown);
+      player.teleport(homes.get(0).getLocation(server));
+    } else {
+      throw new CommandUsageException(plugin.getSimpleFormattedMessage("no-home-set", playerName));
     }
-
-    final UUID defaultWorldId = ((Player) sender).getWorld().getUID();
-
-    // if the arguments are empty do nothing and assume the user is teleporting
-    // themselves
-    if (!arguments.isEmpty()) {
-      // otherwise assume the player wants to teleport to someone else
-      // get the name of the player we are teleporting to
-      final String playerName = matchPlayerName(arguments.remove(0));
-      map.put("player", playerName);
-
-      // attempt to get the world of the player we are teleport to if provided.
-      // if no world is provided use the worldName of the CommandSender
-      if (arguments.isEmpty()) {
-        map.put("worldId", defaultWorldId);
-        // check to see if the world is loaded and if it is not default with
-        // players current world.
-      } else {
-        final String worldName = arguments.remove(0);
-        final World world = this.server.getWorld(worldName);
-        if (world != null) {
-          map.put("worldId", world.getUID());
-        } else {
-          throw new CommandArgumentException(this.plugin.getMessage("teleportcommand-invalid-world"), this.plugin.getMessage("teleportcommand-invalid-world-hint"));
-        }
-      }
-    }
-
-    this.setArguments(map);
-
   }
 
   private String matchPlayerName(String playerName) {
@@ -180,6 +140,29 @@ public class TeleportCommand extends PluginCommand {
     Permission others = new Permission(prefix + this.getName() + "." + plugin.getMessage("teleportcommand-others-permission-name"), plugin.getMessage("teleportcommand-others-permission-description"), PermissionDefault.OP);
     others.addParent(wildcard, true);
     this.addPermission(others);
+  }
+  
+  private UUID getWorldUUID(String worldName) throws CommandArgumentException {
+    World world = server.getWorld(worldName);
+    if (world != null) {
+      return world.getUID();
+    } else {
+      throw new CommandArgumentException(this.getMessage("invalid-world"), this.getMessage("world-must-be-loaded"));
+    }
+  }
+  
+  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
+    this.player = (Player) sender;
+    
+    if (arguments.length == 0) {
+      this.playerName = player.getName();
+      this.worldUUID = player.getLocation().getWorld().getUID();
+    } else if (arguments.length == 2) {
+      String playerName = matchPlayerName(arguments[0]);
+      this.player = server.getPlayerExact(playerName);
+      this.worldUUID = getWorldUUID(arguments[1]);
+    }
+    
   }
 
 }
