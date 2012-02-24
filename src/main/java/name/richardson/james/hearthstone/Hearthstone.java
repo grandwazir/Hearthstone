@@ -20,7 +20,6 @@ package name.richardson.james.hearthstone;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ChoiceFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +60,9 @@ public class Hearthstone extends SimplePlugin {
   public void onEnable() {
     try {
       this.setLoggerPrefix();
+      this.setResourceBundle();
       this.loadConfiguration();
       this.setRootPermission();
-      this.setResourceBundle();
       this.setupDatabase();
       this.registerCommands();
     } catch (final IOException e) {
@@ -78,7 +77,7 @@ public class Hearthstone extends SimplePlugin {
         return;
       }
     }
-    this.logger.info(String.format(this.getMessage("plugin-enabled"), this.getDescription().getName()));
+    this.logger.info(this.getSimpleFormattedMessage("plugin-enabled", this.getDescription().getName()));
   }
 
   private void loadConfiguration() throws IOException {

@@ -37,7 +37,6 @@ import name.richardson.james.bukkit.utilities.command.PluginCommand;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
 import name.richardson.james.hearthstone.DatabaseHandler;
 import name.richardson.james.hearthstone.Hearthstone;
-import name.richardson.james.hearthstone.HearthstoneConfiguration;
 import name.richardson.james.hearthstone.HomeRecord;
 
 public class TeleportCommand extends PluginCommand {
@@ -45,7 +44,6 @@ public class TeleportCommand extends PluginCommand {
   private final Server server;
   private final DatabaseHandler database;
   private final Map<String, Long> cooldownTracker;
-  private final HearthstoneConfiguration configuration;
   
   //* The name of the player we are teleporting to *//
   private String playerName;
@@ -64,7 +62,6 @@ public class TeleportCommand extends PluginCommand {
     this.server = plugin.getServer();
     this.database = plugin.getDatabaseHandler();
     this.cooldownTracker = plugin.getCooldownTracker();
-    this.configuration = plugin.getHearthstoneConfiguration();
     this.cooldown = plugin.getHearthstoneConfiguration().getCooldown();
     this.registerPermissions();
   }
@@ -73,7 +70,7 @@ public class TeleportCommand extends PluginCommand {
     final String senderName = sender.getName().toLowerCase();
 
     if (!isPlayerCooldownExpired() && !player.hasPermission(this.getPermission(2))) {
-      throw new CommandUsageException(String.format(plugin.getMessage("cooldown-not-expired"), TimeFormatter.millisToLongDHMS(cooldownTracker.get(senderName))));
+      throw new CommandUsageException(plugin.getSimpleFormattedMessage("cooldown-not-expired", TimeFormatter.millisToLongDHMS(cooldownTracker.get(senderName))));
     }
     
     if (sender.hasPermission(this.getPermission(1)) && senderName.equalsIgnoreCase(playerName)) {
@@ -161,6 +158,7 @@ public class TeleportCommand extends PluginCommand {
       String playerName = matchPlayerName(arguments[0]);
       this.player = server.getPlayerExact(playerName);
       this.worldUUID = getWorldUUID(arguments[1]);
+      if (this.worldUUID == null) throw new CommandArgumentException(this.plugin.getMessage("invalid-world"), this.plugin.getMessage("invalid-world-hint"));
     }
     
   }

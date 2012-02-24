@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.1.2-SNAPSHOT)
 
+2012-02-24 06:38:58 +0000    implemented localisation upgraded to new version of bukkit-utilities (James Richardson)
 
 v1.1.1
 2012-02-16 03:22:20 +0000    fix issue where debugging was on by default (James Richardson)
