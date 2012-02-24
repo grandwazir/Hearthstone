@@ -23,11 +23,11 @@ public class HomeCommand implements CommandExecutor {
     
     if (args.length == 0) {
       this.teleport.onCommand(sender, command, label, args);
-    } else if (args[0].equalsIgnoreCase("setcommand-name")) {
+    } else if (args[0].equalsIgnoreCase(this.plugin.getMessage("setcommand-name")) {
       String[] arguments;
       arguments = prepareArguments(args, this.plugin.getMessage("setcommand-name"));
       this.set.onCommand(sender, command, label, arguments);
-    }
+    } 
     
     return true;
     
