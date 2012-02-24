@@ -102,7 +102,7 @@ public class TeleportCommand extends PluginCommand {
   private void teleportPlayer() throws CommandUsageException {
     List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(playerName, worldUUID);
     if (!homes.isEmpty()) {
-      cooldownTracker.put(playerName, cooldown);
+      cooldownTracker.put(playerName, System.currentTimeMillis() + cooldown);
       player.teleport(homes.get(0).getLocation(server));
     } else {
       throw new CommandUsageException(plugin.getSimpleFormattedMessage("no-home-set", playerName));
