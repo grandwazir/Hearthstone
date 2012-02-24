@@ -1,5 +1,7 @@
 Changelog for Hearthstone (v1.1.2-SNAPSHOT)
 
+2012-02-24 19:12:04 +0000    added obstruction check to teleport command (James Richardson)
+2012-02-24 19:09:19 +0000    added obstruction checks and hook for WorldGuard (James Richardson)
 2012-02-24 18:10:19 +0000    fix bug where /home set not working correctly (James Richardson)
 2012-02-24 18:03:43 +0000    added HomeCommand (James Richardson)
 2012-02-24 17:33:31 +0000    fix bug where successful set commands where dropping through to next if statement (James Richardson)

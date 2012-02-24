@@ -104,12 +104,11 @@ public class SetCommand extends PluginCommand {
   }
 
   private boolean isLocationObstructed() {
-    int i = 0;
-    while (i < 2) {
-      player.sendMessage(location.add(0, i, 0).getBlock().getType().toString());
-      if (!location.add(0, i, 0).getBlock().isEmpty()) return true;
-      i++;
-    }
+    Location location = this.location.clone();
+    // check the block that the player's legs occupy.
+    if (!location.getBlock().isEmpty()) return true;
+    // check the block that the player's head occupies.
+    if (!location.add(0, 1, 0).getBlock().isEmpty()) return true;
     return false;
   }
 

@@ -100,20 +100,19 @@ public class TeleportCommand extends PluginCommand {
       
   }
   
-  private boolean isLocationObstructed(Location location) {
-    int i = 0;
-    while (i < 2) {
-      player.sendMessage(location.add(0, i, 0).getBlock().getType().toString());
-      if (!location.add(0, i, 0).getBlock().isEmpty()) return true;
-      i++;
-    }
+  private boolean isLocationObstructed(Location orginalLocation) {
+    Location location = orginalLocation.clone();
+    // check the block that the player's legs occupy.
+    if (!location.getBlock().isEmpty()) return true;
+    // check the block that the player's head occupies.
+    if (!location.add(0, 1, 0).getBlock().isEmpty()) return true;
     return false;
   }
 
   private void teleportPlayer() throws CommandUsageException {
     List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(playerName, worldUUID);
     if (!homes.isEmpty()) {
-      if (isLocationObstructed(homes.get(0).getLocation(server))) throw new CommandUsageException(this.plugin.getMessage("home-is-obstructed"));
+      if (isLocationObstructed(homes.get(0).getLocation(server).add(0, 1, 0))) throw new CommandUsageException(this.plugin.getMessage("home-is-obstructed"));
       cooldownTracker.put(playerName, System.currentTimeMillis() + cooldown);
       player.teleport(homes.get(0).getLocation(server));
     } else {
