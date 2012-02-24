@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -98,10 +99,21 @@ public class TeleportCommand extends PluginCommand {
     return true;
       
   }
+  
+  private boolean isLocationObstructed(Location location) {
+    int i = 0;
+    while (i < 2) {
+      player.sendMessage(location.add(0, i, 0).getBlock().getType().toString());
+      if (!location.add(0, i, 0).getBlock().isEmpty()) return true;
+      i++;
+    }
+    return false;
+  }
 
   private void teleportPlayer() throws CommandUsageException {
     List<HomeRecord> homes = database.findHomeRecordsByOwnerAndWorld(playerName, worldUUID);
     if (!homes.isEmpty()) {
+      if (isLocationObstructed(homes.get(0).getLocation(server))) throw new CommandUsageException(this.plugin.getMessage("home-is-obstructed"));
       cooldownTracker.put(playerName, System.currentTimeMillis() + cooldown);
       player.teleport(homes.get(0).getLocation(server));
     } else {
