@@ -86,10 +86,10 @@ public class TeleportCommand extends PluginCommand {
   }
 
   private boolean isPlayerCooldownExpired() {
+    final String playerName = player.getName().toLowerCase();
     
     if (!cooldownTracker.containsKey(playerName)) return true;
-    
-    final String playerName = player.getName().toLowerCase();
+   
     final long cooldown = cooldownTracker.get(playerName);
     
     if ((cooldown - System.currentTimeMillis()) > 0) return false;
@@ -154,11 +154,13 @@ public class TeleportCommand extends PluginCommand {
     if (arguments.length == 0) {
       this.playerName = player.getName();
       this.worldUUID = player.getLocation().getWorld().getUID();
-    } else if (arguments.length == 2) {
+    } else if (arguments.length == 1) {
       String playerName = matchPlayerName(arguments[0]);
-      this.player = server.getPlayerExact(playerName);
+      this.playerName = playerName;
+      this.worldUUID = player.getLocation().getWorld().getUID();
+    } else if (arguments.length == 2) {
+      this.playerName = matchPlayerName(arguments[0]);
       this.worldUUID = getWorldUUID(arguments[1]);
-      if (this.worldUUID == null) throw new CommandArgumentException(this.plugin.getMessage("invalid-world"), this.plugin.getMessage("invalid-world-hint"));
     }
     
   }

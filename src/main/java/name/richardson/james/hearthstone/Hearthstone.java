@@ -29,6 +29,7 @@ import javax.persistence.PersistenceException;
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.internals.Logger;
 import name.richardson.james.bukkit.utilities.plugin.SimplePlugin;
+import name.richardson.james.hearthstone.general.HomeCommand;
 import name.richardson.james.hearthstone.general.SetCommand;
 import name.richardson.james.hearthstone.general.TeleportCommand;
 
@@ -89,10 +90,11 @@ public class Hearthstone extends SimplePlugin {
   private void registerCommands() {
     this.commandManager = new CommandManager(this);
     this.getCommand("hs").setExecutor(this.commandManager);
-    this.commandManager.addCommand(new SetCommand(this));
-    TeleportCommand command = new TeleportCommand(this);
-    this.commandManager.addCommand(command);
-    this.getCommand("home").setExecutor(command);
+    SetCommand setCommand = new SetCommand(this);
+    this.commandManager.addCommand(setCommand);
+    TeleportCommand teleportCommand = new TeleportCommand(this);
+    this.commandManager.addCommand(teleportCommand);
+    this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
   }
 
   private void setupDatabase() throws SQLException {

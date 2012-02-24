@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.1.2-SNAPSHOT)
 
+2012-02-24 17:33:31 +0000    fix bug where successful set commands where dropping through to next if statement (James Richardson)
 2012-02-24 17:21:00 +0000    fix bug where cooldown is always 5 minutes and in checking if it has expired (James Richardson)
 2012-02-24 17:17:33 +0000    fixed another key missing exception (James Richardson)
 2012-02-24 17:15:45 +0000    fixed missing key exceptions (James Richardson)
