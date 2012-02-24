@@ -75,16 +75,18 @@ public class SetCommand extends PluginCommand {
   }
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
+    boolean set = false;
     this.location = ((Player) sender).getLocation(); 
     
     if (sender.hasPermission(this.getPermission(1)) && this.playerName.equalsIgnoreCase(sender.getName())) {
       this.createHome();
       sender.sendMessage(ChatColor.GREEN + this.plugin.getMessage("home-set"));
+      set = true;
     } else {
       throw new CommandPermissionException(null, this.getPermission(1));
     }
     
-    if (sender.hasPermission(this.getPermission(2)) && !this.playerName.equalsIgnoreCase(sender.getName())) {
+    if (sender.hasPermission(this.getPermission(2)) && !this.playerName.equalsIgnoreCase(sender.getName()) && !set) {
       this.createHome();
       sender.sendMessage(ChatColor.GREEN + this.plugin.getSimpleFormattedMessage("home-set-others", this.playerName));
     } else {

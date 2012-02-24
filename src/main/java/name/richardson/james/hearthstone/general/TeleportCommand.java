@@ -70,7 +70,7 @@ public class TeleportCommand extends PluginCommand {
     final String senderName = sender.getName().toLowerCase();
 
     if (!isPlayerCooldownExpired() && !player.hasPermission(this.getPermission(2))) {
-      throw new CommandUsageException(plugin.getSimpleFormattedMessage("cooldown-not-expired", TimeFormatter.millisToLongDHMS(cooldownTracker.get(senderName))));
+      throw new CommandUsageException(plugin.getSimpleFormattedMessage("cooldown-not-expired", TimeFormatter.millisToLongDHMS(cooldownTracker.get(senderName) - System.currentTimeMillis())));
     }
     
     if (sender.hasPermission(this.getPermission(1)) && senderName.equalsIgnoreCase(playerName)) {
@@ -92,7 +92,7 @@ public class TeleportCommand extends PluginCommand {
     final String playerName = player.getName().toLowerCase();
     final long cooldown = cooldownTracker.get(playerName);
     
-    if ((System.currentTimeMillis() - cooldown) > 0) return false;
+    if ((cooldown - System.currentTimeMillis()) > 0) return false;
     
     cooldownTracker.remove(playerName);
     return true;
