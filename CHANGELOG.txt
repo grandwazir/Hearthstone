@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.2.1-SNAPSHOT)
 
+2012-02-27 22:01:43 +0000    update changelog, prepare to release (James Richardson)
 2012-02-27 21:58:26 +0000    add site directory (James Richardson)
 2012-02-27 21:58:12 +0000    build against latest BukkitUtilities (James Richardson)
 2012-02-27 21:55:22 +0000    updated POM to add licence and developer information (James Richardson)
