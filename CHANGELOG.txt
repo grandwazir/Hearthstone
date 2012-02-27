@@ -1,5 +1,13 @@
-Changelog for Hearthstone (v1.1.2-SNAPSHOT)
+Changelog for Hearthstone (v1.2.1-SNAPSHOT)
 
+2012-02-27 21:58:26 +0000    add site directory (James Richardson)
+2012-02-27 21:58:12 +0000    build against latest BukkitUtilities (James Richardson)
+2012-02-27 21:55:22 +0000    updated POM to add licence and developer information (James Richardson)
+2012-02-27 21:46:51 +0000    updated pom to match my other projects (James Richardson)
+2012-02-24 20:04:17 +0000    added README (James Richardson)
+
+v1.2.0
+2012-02-24 19:44:34 +0000    preparing for release (James Richardson)
 2012-02-24 19:30:17 +0000    fix issue where we were modifying the location before it was saved (James Richardson)
 2012-02-24 19:12:04 +0000    added obstruction check to teleport command (James Richardson)
 2012-02-24 19:09:19 +0000    added obstruction checks and hook for WorldGuard (James Richardson)

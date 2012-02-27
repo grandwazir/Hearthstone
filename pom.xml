@@ -232,9 +232,7 @@
                <execution>
                  <goals>
                    <goal>site</goal>
-                   <goal>deploy</goal>
                  </goals>
-                 <phase>install</phase>
                  <phase>site</phase>
                </execution>
              </executions>
