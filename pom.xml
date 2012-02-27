@@ -5,10 +5,32 @@
   <version>1.2.1-SNAPSHOT</version>
   <name>Hearthstone</name>
   <description>A simple plugin to provide multiworld homes</description>
+  <url>http://grandwazir.github.com/${project.name}/</url>
+
+  <licenses>
+    <license>
+      <name>General Public License (Version 3)</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <developers>
+    <developer>
+      <id>grandwazir</id>
+      <name>James Richardson</name>
+      <email>grandwazir@armathia.net</email>
+      <url>${project.url}</url>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>0</timezone>
+    </developer>
+  </developers>
 
   <scm>
     <!-- Github repo -->
@@ -98,6 +120,7 @@
               <report>issue-tracking</report>
               <report>license</report>
               <report>scm</report>
+              <report>project-team</report>
             </reports>
           </reportSet>
         </reportSets>
