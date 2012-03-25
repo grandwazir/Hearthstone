@@ -150,7 +150,7 @@ public class SetCommand extends PluginCommand {
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
     this.player = (Player) sender;
     
-    if (arguments.length == 0) {
+    if (arguments.length == 1) {
       this.playerName = sender.getName(); 
     } else {
       this.playerName = matchPlayerName(arguments[0]);
