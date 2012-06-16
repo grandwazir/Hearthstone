@@ -20,23 +20,18 @@ package name.richardson.james.hearthstone;
 
 import java.io.IOException;
 
-import name.richardson.james.bukkit.utilities.configuration.AbstractConfiguration;
+import name.richardson.james.bukkit.utilities.configuration.PluginConfiguration;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
 
-public class HearthstoneConfiguration extends AbstractConfiguration {
-
-  public static final String FILE_NAME = "config.yml";
+public class HearthstoneConfiguration extends PluginConfiguration {
 
   public HearthstoneConfiguration(Hearthstone plugin) throws IOException {
-    super(plugin, FILE_NAME);
+    super(plugin);
   }
 
   public long getCooldown() {
     return TimeFormatter.parseTime(configuration.getString("cooldown"));
   }
 
-  public boolean isDebugging() {
-    return configuration.getBoolean("debugging");
-  }
 
 }

@@ -1,5 +1,13 @@
-Changelog for Hearthstone (v1.2.1-SNAPSHOT)
+Changelog for Hearthstone (v1.2.3-SNAPSHOT)
 
+
+v1.2.2
+2012-03-25 00:16:53 +0000    reverted change in SetCommand (James Richardson)
+2012-03-25 00:15:18 +0000    Build against latest version of BukkitUtilities (James Richardson)
+
+v1.2.1
+2012-02-27 22:11:14 +0000    altered pom to not auto deploy sites (throwing an exception) (James Richardson)
+2012-02-27 22:04:04 +0000    alter POM to not publish snapshots when installing artifacts locally (James Richardson)
 2012-02-27 22:01:43 +0000    update changelog, prepare to release (James Richardson)
 2012-02-27 21:58:26 +0000    add site directory (James Richardson)
 2012-02-27 21:58:12 +0000    build against latest BukkitUtilities (James Richardson)

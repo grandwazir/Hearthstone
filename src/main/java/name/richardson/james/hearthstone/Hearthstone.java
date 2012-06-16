@@ -28,18 +28,14 @@ import javax.persistence.PersistenceException;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-
-import org.bukkit.World;
 
 import name.richardson.james.bukkit.utilities.command.CommandManager;
-import name.richardson.james.bukkit.utilities.internals.Logger;
-import name.richardson.james.bukkit.utilities.plugin.SimplePlugin;
+import name.richardson.james.bukkit.utilities.plugin.SkeletonPlugin;
 import name.richardson.james.hearthstone.general.HomeCommand;
 import name.richardson.james.hearthstone.general.SetCommand;
 import name.richardson.james.hearthstone.general.TeleportCommand;
 
-public class Hearthstone extends SimplePlugin {
+public class Hearthstone extends SkeletonPlugin {
 
   private CommandManager commandManager;
   private DatabaseHandler database;
@@ -64,31 +60,6 @@ public class Hearthstone extends SimplePlugin {
   public HearthstoneConfiguration getHearthstoneConfiguration() {
     return this.configuration;
   }
-
-  @Override
-  public void onEnable() {
-    try {
-      this.setLoggerPrefix();
-      this.setResourceBundle();
-      this.loadConfiguration();
-      this.setRootPermission();
-      this.setupDatabase();
-      this.connectToWorldGuard();
-      this.registerCommands();
-    } catch (final IOException e) {
-      this.logger.severe("Unable to close file stream!");
-      this.setEnabled(false);
-    } catch (final SQLException e) {
-      this.logger.severe(this.getMessage("unable-to-use-database"));
-      this.setEnabled(false);
-    } finally {
-      if (!this.isEnabled()) {
-        this.logger.severe(this.getMessage("panic"));
-        return;
-      }
-    }
-    this.logger.info(this.getSimpleFormattedMessage("plugin-enabled", this.getDescription().getName()));
-  }
   
   public GlobalRegionManager getGlobalRegionManager() {
     if (this.worldGuard != null) {
@@ -97,6 +68,7 @@ public class Hearthstone extends SimplePlugin {
       return null;
     }
   }
+  
 
   private void connectToWorldGuard() {
     this.worldGuard = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
@@ -105,13 +77,12 @@ public class Hearthstone extends SimplePlugin {
     }
   }
 
-  private void loadConfiguration() throws IOException {
+  protected void loadConfiguration() throws IOException {
     this.configuration = new HearthstoneConfiguration(this);
-    if (configuration.isDebugging())
-      Logger.setDebugging(this, true);
+    this.connectToWorldGuard();
   }
 
-  private void registerCommands() {
+  protected void registerCommands() {
     this.commandManager = new CommandManager(this);
     this.getCommand("hs").setExecutor(this.commandManager);
     SetCommand setCommand = new SetCommand(this);
@@ -120,8 +91,9 @@ public class Hearthstone extends SimplePlugin {
     this.commandManager.addCommand(teleportCommand);
     this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
   }
+  
 
-  private void setupDatabase() throws SQLException {
+  protected void setupPersistence() throws SQLException {
     try {
       this.getDatabase().find(HomeRecord.class).findRowCount();
     } catch (final PersistenceException ex) {
@@ -131,12 +103,22 @@ public class Hearthstone extends SimplePlugin {
     this.database = new DatabaseHandler(this.getDatabase());
     this.logger.info(this.getFormattedHomeCount(database.count(HomeRecord.class)));
   }
+  
 
   private String getFormattedHomeCount(int count) {
     Object[] arguments = {count};
     double[] limits = {0, 1, 2};
     String[] formats = {this.getMessage("no-homes"), this.getMessage("one-home"), this.getMessage("many-homes")};
     return this.getChoiceFormattedMessage("homes-loaded", arguments, formats, limits);
+  }
+
+  
+  public String getArtifactID() {
+    return "hearthstone";
+  }
+
+  public String getGroupID() {
+    return "name.richardson.james.bukkit";
   }
 
 }

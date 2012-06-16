@@ -21,7 +21,6 @@ package name.richardson.james.hearthstone.general;
 import java.util.List;
 
 import com.sk89q.worldguard.protection.GlobalRegionManager;
-import com.sk89q.worldguard.protection.managers.RegionManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

@@ -5,15 +5,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import name.richardson.james.bukkit.utilities.command.PluginCommand;
-import name.richardson.james.bukkit.utilities.plugin.SimplePlugin;
+import name.richardson.james.bukkit.utilities.plugin.SkeletonPlugin;
 
 public class HomeCommand implements CommandExecutor {
 
   private final PluginCommand teleport; 
   private final PluginCommand set;
-  private final SimplePlugin plugin; 
+  private final SkeletonPlugin plugin; 
   
-  public HomeCommand(SimplePlugin plugin, PluginCommand teleport, PluginCommand set) {
+  public HomeCommand(SkeletonPlugin plugin, PluginCommand teleport, PluginCommand set) {
     this.teleport = teleport;
     this.set = set;
     this.plugin = plugin;
