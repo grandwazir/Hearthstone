@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.3.1-SNAPSHOT)
 
+2013-02-10 17:45:42 +0000    register cooldown permission (James Richardson)
 2013-02-10 17:42:28 +0000    allow access to commands by default (James Richardson)
 2013-02-10 17:36:32 +0000    prevent registering permissions twice (James Richardson)
 2013-02-10 17:35:18 +0000    update localisation (James Richardson)
