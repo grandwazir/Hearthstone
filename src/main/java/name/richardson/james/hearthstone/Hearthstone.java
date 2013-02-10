@@ -101,6 +101,7 @@ public class Hearthstone extends AbstractPlugin {
   }
 
   protected void loadConfiguration() throws IOException {
+    super.loadConfiguration();
     this.configuration = new HearthstoneConfiguration(this);
     this.connectToWorldGuard();
   }
