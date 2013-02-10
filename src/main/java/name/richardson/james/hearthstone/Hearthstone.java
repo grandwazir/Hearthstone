@@ -92,7 +92,7 @@ public class Hearthstone extends AbstractPlugin {
   private void connectToWorldGuard() {
     this.worldGuard = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
     if (this.worldGuard != null) {
-      this.logger.info(this.getSimpleFormattedMessage("worldguard-hooked", this.worldGuard.getDescription().getFullName()));
+      this.getCustomLogger().info(this, this.getLocalisation().getMessage("worldguard-hooked", this.worldGuard.getDescription().getFullName()));
     }
   }
 
@@ -110,19 +110,6 @@ public class Hearthstone extends AbstractPlugin {
     commandManager.addCommand(teleportCommand);
     this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
   }
-  
-
-  protected void setupPersistence() throws SQLException {
-    try {
-      this.getDatabase().find(HomeRecord.class).findRowCount();
-    } catch (final PersistenceException ex) {
-      this.logger.warning(this.getMessage("no-database"));
-      this.installDDL();
-    }
-    this.database = new DatabaseHandler(this.getDatabase());
-    this.logger.info(this.getFormattedHomeCount(database.count(HomeRecord.class)));
-  }
-  
 
   private String getFormattedHomeCount(int count) {
     Object[] arguments = {count};
