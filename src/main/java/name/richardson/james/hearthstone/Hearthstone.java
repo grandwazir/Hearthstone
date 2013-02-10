@@ -32,6 +32,7 @@ import com.sk89q.worldguard.protection.GlobalRegionManager;
 
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.configuration.DatabaseConfiguration;
+import name.richardson.james.bukkit.utilities.formatters.ChoiceFormatter;
 import name.richardson.james.bukkit.utilities.persistence.SQLStorage;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
 import name.richardson.james.hearthstone.general.HomeCommand;
@@ -111,14 +112,6 @@ public class Hearthstone extends AbstractPlugin {
     this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
   }
 
-  private String getFormattedHomeCount(int count) {
-    Object[] arguments = {count};
-    double[] limits = {0, 1, 2};
-    String[] formats = {this.getMessage("no-homes"), this.getMessage("one-home"), this.getMessage("many-homes")};
-    return this.getChoiceFormattedMessage("homes-loaded", arguments, formats, limits);
-  }
-
-  
   public String getArtifactID() {
     return "hearthstone";
   }
