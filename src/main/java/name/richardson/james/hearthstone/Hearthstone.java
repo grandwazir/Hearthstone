@@ -58,7 +58,7 @@ public class Hearthstone extends AbstractPlugin {
 
   @Override
   public List<Class<?>> getDatabaseClasses() {
-    return DatabaseHandler.getDatabaseClasses();
+    return database.getClasses();
   }
 
   @Override
