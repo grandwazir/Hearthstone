@@ -18,12 +18,14 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.validation.NotNull;
 
 import org.bukkit.Location;
@@ -33,6 +35,20 @@ import org.bukkit.World;
 @Entity()
 @Table(name = "hearthstone_homes")
 public class HomeRecord {
+
+  // this is to get around a bug where optimistic lock errors will occur if you
+  // attempt to delete the records normally
+  public static int deleteHomes(EbeanServer database, String playerName, final UUID uuid) {
+    return database.createSqlUpdate("DELETE from hearthstone_homes WHERE world_uuid='" + uuid.toString() + "' AND created_by='" + playerName + "'").execute();
+  }
+
+  public static List<HomeRecord> findHomeRecordsByOwner(EbeanServer database, final String playerName) {
+    return database.find(HomeRecord.class).where().ieq("createdBy", playerName).findList();
+  }
+
+  public static List<HomeRecord> findHomeRecordsByOwnerAndWorld(EbeanServer database, final String playerName, final UUID uuid) {
+    return database.find(HomeRecord.class).where().ieq("createdBy", playerName).eq("worldUUID", uuid).findList();
+  }
 
   @Id
   private long createdAt;
