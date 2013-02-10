@@ -20,9 +20,9 @@ package name.richardson.james.hearthstone.general;
 
 import java.util.List;
 
+import com.avaje.ebean.EbeanServer;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -30,18 +30,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
+import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
-import name.richardson.james.bukkit.utilities.command.PluginCommand;
-import name.richardson.james.hearthstone.DatabaseHandler;
 import name.richardson.james.hearthstone.Hearthstone;
 import name.richardson.james.hearthstone.HomeRecord;
 
-public class SetCommand extends PluginCommand {
+public class SetCommand extends AbstractCommand {
 
   private final Server server;
-  private final DatabaseHandler database;
+  
+  private final EbeanServer database;
   
   /** The name of the players home we are setting */
   private String playerName;
@@ -54,21 +54,25 @@ public class SetCommand extends PluginCommand {
   /** The player who is setting the home */
   private Player player;
   
+  private Permission own;
+
+  private Permission others;
+  
   public SetCommand(Hearthstone plugin) {
-    super(plugin);
+    super(plugin, true);
     this.manager = plugin.getGlobalRegionManager();
     this.server = plugin.getServer();
-    this.database = plugin.getDatabaseHandler();
-    this.registerPermissions();
+    this.database = plugin.getDatabase();
+    this.registerPermissions(true);
   }
 
   private void createHome() throws CommandUsageException {
     // check if location is obstructed
-    if (isLocationObstructed()) throw new CommandUsageException(this.plugin.getMessage("location-is-obstructed"));
+    if (isLocationObstructed()) throw new CommandUsageException(this.getLocalisation().getMessage(this, "location-is-obstructed"));
     // check if the location is buildable
-    if (!isPlayerAllowedToBuild()) throw new CommandUsageException(this.plugin.getMessage("not-allowed-to-build-here"));
+    if (!isPlayerAllowedToBuild()) throw new CommandUsageException(this.getLocalisation().getMessage(this, "not-allowed-to-build-here"));
     // delete any existing homes
-    database.deleteHomes(playerName, location.getWorld().getUID());
+    HomeRecord.deleteHomes(database, playerName, location.getWorld().getUID());
     // create the home
     final HomeRecord record = new HomeRecord();
     record.setCreatedAt(System.currentTimeMillis());
@@ -84,20 +88,19 @@ public class SetCommand extends PluginCommand {
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
     this.location = ((Player) sender).getLocation(); 
-    
-    if (sender.hasPermission(this.getPermission(1)) && this.playerName.equalsIgnoreCase(sender.getName())) {
+    if (sender.hasPermission(own) && this.playerName.equalsIgnoreCase(sender.getName())) {
       this.createHome();
-      sender.sendMessage(ChatColor.GREEN + this.plugin.getMessage("home-set"));
+      sender.sendMessage(this.getLocalisation().getMessage(this, "home-set"));
       return;
     } else if (this.playerName.equalsIgnoreCase(sender.getName())) {
-      throw new CommandPermissionException(null, this.getPermission(1));
+      throw new CommandPermissionException(null, others);
     }
     
-    if (sender.hasPermission(this.getPermission(2)) && !this.playerName.equalsIgnoreCase(sender.getName())) {
+    if (sender.hasPermission(others) && !this.playerName.equalsIgnoreCase(sender.getName())) {
       this.createHome();
-      sender.sendMessage(ChatColor.GREEN + this.plugin.getSimpleFormattedMessage("home-set-others", this.playerName));
+      sender.sendMessage(this.getLocalisation().getMessage(this, "home-set-others", this.playerName));
     } else if (!this.playerName.equalsIgnoreCase(sender.getName())) {
-      throw new CommandPermissionException(null, this.getPermission(2));
+      throw new CommandPermissionException(null, others);
     }
 
   }
@@ -127,28 +130,21 @@ public class SetCommand extends PluginCommand {
       return matches.get(0).getName();
     }
   }
-
-  private void registerPermissions() {
-    final String prefix = plugin.getDescription().getName().toLowerCase() + ".";
-    final String wildcardDescription = String.format(plugin.getMessage("wildcard-permission-description"), this.getName());
-    // create the wildcard permission
-    Permission wildcard = new Permission(prefix + this.getName() + ".*", wildcardDescription, PermissionDefault.OP);
-    wildcard.addParent(plugin.getRootPermission(), true);
-    this.addPermission(wildcard);
-    // create the base permission
-    Permission base = new Permission(prefix + this.getName(), plugin.getMessage("setcommand-permission-description"), PermissionDefault.TRUE);
-    base.addParent(wildcard, true);
-    this.addPermission(base);
-    // add ability to set other user's homes
-    Permission others = new Permission(prefix + this.getName() + "." + plugin.getMessage("setcommand-others-permission-name"), plugin.getMessage("setcommand-others-permission-description"), PermissionDefault.OP);
-    others.addParent(wildcard, true);
-    this.addPermission(others);
+  
+  protected void registerPermissions(boolean wildcard) {
+    super.registerPermissions(wildcard);
+    final String prefix = this.getPermissionManager().getRootPermission().getName().replace("*", "");
+    own = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "own-permission-name"), this.getLocalisation().getMessage(this, "own-permission-description"), PermissionDefault.OP);
+    own.addParent(this.getRootPermission(), true);
+    this.getPermissionManager().addPermission(own, false);
+    // add ability to pardon the bans of others
+    others = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "others-permission-name"), this.getLocalisation().getMessage(this, "others-permission-description"), PermissionDefault.OP);
+    others.addParent(this.getRootPermission(), true);
+    this.getPermissionManager().addPermission(others, false);
   }
-
   
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
     this.player = (Player) sender;
-    
     if (arguments.length == 0) {
       this.playerName = sender.getName(); 
     } else {
