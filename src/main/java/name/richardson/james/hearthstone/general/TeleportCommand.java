@@ -137,12 +137,12 @@ public class TeleportCommand extends AbstractCommand {
     own = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "own-permission-name"), this.getLocalisation().getMessage(this, "own-permission-description"), PermissionDefault.TRUE);
     own.addParent(this.getRootPermission(), false);
     this.getPermissionManager().addPermission(own, false);
-    // add ability to pardon the bans of others
     others = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "others-permission-name"), this.getLocalisation().getMessage(this, "others-permission-description"), PermissionDefault.OP);
     others.addParent(this.getRootPermission(), false);
     this.getPermissionManager().addPermission(others, false);
     cooldown = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "cooldown-permission-name"), this.getLocalisation().getMessage(this, "cooldown-permission-description"), PermissionDefault.TRUE);
     cooldown.addParent(this.getRootPermission(), false);
+    this.getPermissionManager().addPermission(cooldown, false);
     // provide access to this command by default
     this.getPermissionManager().getPermission(prefix + this.getName()).setDefault(PermissionDefault.TRUE);
   }
