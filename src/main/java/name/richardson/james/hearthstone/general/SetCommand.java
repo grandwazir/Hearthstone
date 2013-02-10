@@ -63,7 +63,6 @@ public class SetCommand extends AbstractCommand {
     this.manager = plugin.getGlobalRegionManager();
     this.server = plugin.getServer();
     this.database = plugin.getDatabase();
-    this.registerPermissions(true);
   }
 
   private void createHome() throws CommandUsageException {

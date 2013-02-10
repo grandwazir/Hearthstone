@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.3.1-SNAPSHOT)
 
+2013-02-10 17:35:18 +0000    update localisation (James Richardson)
 2013-02-10 17:29:56 +0000    forgot to call super when loading configuration (James Richardson)
 2013-02-10 17:26:39 +0000    add default database settings (James Richardson)
 2013-02-10 17:22:33 +0000    fix NPE error when retrieving database classes (James Richardson)

@@ -72,7 +72,6 @@ public class TeleportCommand extends AbstractCommand {
     this.database = plugin.getDatabase();
     this.cooldownTracker = plugin.getCooldownTracker();
     this.cooldownTime = plugin.getHearthstoneConfiguration().getCooldown();
-    this.registerPermissions(true);
   }
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
