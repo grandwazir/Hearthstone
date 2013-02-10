@@ -30,8 +30,7 @@ public class HearthstoneConfiguration extends PluginConfiguration {
   }
 
   public long getCooldown() {
-    return TimeFormatter.parseTime(configuration.getString("cooldown"));
+    return TimeFormatter.parseTime(this.getConfiguration().getString("cooldown"));
   }
-
 
 }

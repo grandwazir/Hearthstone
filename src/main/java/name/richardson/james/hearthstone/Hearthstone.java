@@ -26,22 +26,30 @@ import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
+import com.avaje.ebean.EbeanServer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 
 import name.richardson.james.bukkit.utilities.command.CommandManager;
-import name.richardson.james.bukkit.utilities.plugin.SkeletonPlugin;
+import name.richardson.james.bukkit.utilities.configuration.DatabaseConfiguration;
+import name.richardson.james.bukkit.utilities.persistence.SQLStorage;
+import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
 import name.richardson.james.hearthstone.general.HomeCommand;
 import name.richardson.james.hearthstone.general.SetCommand;
 import name.richardson.james.hearthstone.general.TeleportCommand;
 
-public class Hearthstone extends SkeletonPlugin {
+public class Hearthstone extends AbstractPlugin {
 
-  private CommandManager commandManager;
-  private DatabaseHandler database;
+  /* The backing store for Hearthstone */
+  private SQLStorage database;
+  
+  /* Configuration for the plugin */
   private HearthstoneConfiguration configuration;
+  
+  /* Cooldown tracker for the plugin */
   private final Map<String, Long> cooldown = new HashMap<String, Long>();
   
+  /* Reference to the WorldGuard plugin if loaded */
   private WorldGuardPlugin worldGuard;
 
   public Map<String, Long> getCooldownTracker() {
@@ -53,10 +61,21 @@ public class Hearthstone extends SkeletonPlugin {
     return DatabaseHandler.getDatabaseClasses();
   }
 
-  public DatabaseHandler getDatabaseHandler() {
-    return this.database;
+  @Override
+  protected void establishPersistence() throws SQLException {
+    try {
+      this.database = new SQLStorage(this, new DatabaseConfiguration(this), this.getDatabaseClasses());
+      this.database.initalise();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
-
+  
+  @Override
+  public EbeanServer getDatabase() {
+    return this.database.getEbeanServer();
+  }
+  
   public HearthstoneConfiguration getHearthstoneConfiguration() {
     return this.configuration;
   }
@@ -83,12 +102,12 @@ public class Hearthstone extends SkeletonPlugin {
   }
 
   protected void registerCommands() {
-    this.commandManager = new CommandManager(this);
-    this.getCommand("hs").setExecutor(this.commandManager);
+    CommandManager commandManager = new CommandManager(this);
+    this.getCommand("hs").setExecutor(commandManager);
     SetCommand setCommand = new SetCommand(this);
-    this.commandManager.addCommand(setCommand);
+    commandManager.addCommand(setCommand);
     TeleportCommand teleportCommand = new TeleportCommand(this);
-    this.commandManager.addCommand(teleportCommand);
+    commandManager.addCommand(teleportCommand);
     this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
   }
   
