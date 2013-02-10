@@ -21,6 +21,7 @@ package name.richardson.james.hearthstone;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,9 @@ public class Hearthstone extends AbstractPlugin {
 
   @Override
   public List<Class<?>> getDatabaseClasses() {
-    return database.getClasses();
+    final List<Class<?>> classes = new LinkedList<Class<?>>();
+    classes.add(HomeRecord.class);
+    return classes;
   }
 
   @Override
