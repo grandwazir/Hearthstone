@@ -143,6 +143,8 @@ public class TeleportCommand extends AbstractCommand {
     this.getPermissionManager().addPermission(others, false);
     cooldown = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "cooldown-permission-name"), this.getLocalisation().getMessage(this, "cooldown-permission-description"), PermissionDefault.TRUE);
     cooldown.addParent(this.getRootPermission(), false);
+    // provide access to this command by default
+    this.getPermissionManager().getPermission(prefix + this.getName()).setDefault(PermissionDefault.TRUE);
   }
   
   private UUID getWorldUUID(String worldName) throws CommandArgumentException {

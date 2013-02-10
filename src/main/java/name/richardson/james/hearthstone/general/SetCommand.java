@@ -133,13 +133,15 @@ public class SetCommand extends AbstractCommand {
   protected void registerPermissions(boolean wildcard) {
     super.registerPermissions(wildcard);
     final String prefix = this.getPermissionManager().getRootPermission().getName().replace("*", "");
-    own = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "own-permission-name"), this.getLocalisation().getMessage(this, "own-permission-description"), PermissionDefault.OP);
+    own = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "own-permission-name"), this.getLocalisation().getMessage(this, "own-permission-description"), PermissionDefault.TRUE);
     own.addParent(this.getRootPermission(), true);
     this.getPermissionManager().addPermission(own, false);
     // add ability to pardon the bans of others
     others = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "others-permission-name"), this.getLocalisation().getMessage(this, "others-permission-description"), PermissionDefault.OP);
     others.addParent(this.getRootPermission(), true);
     this.getPermissionManager().addPermission(others, false);
+    // provide access to this command by default
+    this.getPermissionManager().getPermission(prefix + this.getName()).setDefault(PermissionDefault.TRUE);
   }
   
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
