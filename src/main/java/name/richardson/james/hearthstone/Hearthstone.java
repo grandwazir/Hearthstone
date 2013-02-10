@@ -96,7 +96,7 @@ public class Hearthstone extends AbstractPlugin {
   private void connectToWorldGuard() {
     this.worldGuard = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
     if (this.worldGuard != null) {
-      this.getCustomLogger().info(this, this.getLocalisation().getMessage("worldguard-hooked", this.worldGuard.getDescription().getFullName()));
+      this.getCustomLogger().info(this, this.getLocalisation().getMessage(this, "worldguard-hooked", this.worldGuard.getDescription().getFullName()));
     }
   }
 
