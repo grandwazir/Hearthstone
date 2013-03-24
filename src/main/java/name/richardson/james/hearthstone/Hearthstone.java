@@ -106,7 +106,6 @@ public class Hearthstone extends AbstractPlugin {
   }
 
   protected void registerCommands() {
-    this.getLogger().info(this.getCustomLogger().getClass().getMethods().toString());
     CommandManager commandManager = new CommandManager(this);
     this.getCommand("hs").setExecutor(commandManager);
     SetCommand setCommand = new SetCommand(this);
