@@ -1,4 +1,5 @@
 /*******************************************************************************
+
  * Copyright (c) 2012 James Richardson.
  * 
  * Hearthstone.java is part of Hearthstone.
@@ -25,20 +26,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
-
 import com.avaje.ebean.EbeanServer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.configuration.DatabaseConfiguration;
-import name.richardson.james.bukkit.utilities.formatters.ChoiceFormatter;
 import name.richardson.james.bukkit.utilities.persistence.SQLStorage;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
 import name.richardson.james.hearthstone.general.HomeCommand;
 import name.richardson.james.hearthstone.general.SetCommand;
 import name.richardson.james.hearthstone.general.TeleportCommand;
+import name.richardson.james.hearthstone.HomeRecord;
 
 public class Hearthstone extends AbstractPlugin {
 
@@ -107,6 +106,7 @@ public class Hearthstone extends AbstractPlugin {
   }
 
   protected void registerCommands() {
+    this.getLogger().info(this.getCustomLogger().getClass().getMethods().toString());
     CommandManager commandManager = new CommandManager(this);
     this.getCommand("hs").setExecutor(commandManager);
     SetCommand setCommand = new SetCommand(this);

@@ -18,6 +18,7 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -67,24 +69,24 @@ public class TeleportCommand extends AbstractCommand {
   private Permission cooldown;
 
   public TeleportCommand(Hearthstone plugin) {
-    super(plugin, true);
+    super(plugin);
     this.server = plugin.getServer();
     this.database = plugin.getDatabase();
     this.cooldownTracker = plugin.getCooldownTracker();
     this.cooldownTime = plugin.getHearthstoneConfiguration().getCooldown();
+    this.registerPermissions();
   }
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
-    final String senderName = sender.getName().toLowerCase();
 
     if (!isPlayerCooldownExpired() && player.hasPermission(cooldown)) {
-      throw new CommandUsageException(this.getLocalisation().getMessage(this, "cooldown-not-expired", TimeFormatter.millisToLongDHMS(cooldownTracker.get(senderName) - System.currentTimeMillis())));
+      throw new CommandUsageException(this.getLocalisation().getMessage(this, "cooldown-not-expired", TimeFormatter.millisToLongDHMS(cooldownTracker.get(sender.getName()) - System.currentTimeMillis())));
     }
     
-    if (sender.hasPermission(own) && senderName.equalsIgnoreCase(playerName)) {
+    if (sender.hasPermission(own) && sender.getName().equalsIgnoreCase(playerName)) {
       teleportPlayer();
       return;
-    } else if (sender.hasPermission(others) && !senderName.equalsIgnoreCase(playerName)) {
+    } else if (sender.hasPermission(others) && !sender.getName().equalsIgnoreCase(playerName)) {
       teleportPlayer();
       sender.sendMessage(this.getLocalisation().getMessage(this, "teleported-home", playerName));
     } else {
@@ -131,20 +133,13 @@ public class TeleportCommand extends AbstractCommand {
     }
   }
 
-  protected void registerPermissions(boolean wildcard) {
-    super.registerPermissions(wildcard);
-    final String prefix = this.getPermissionManager().getRootPermission().getName().replace("*", "");
-    own = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "own-permission-name"), this.getLocalisation().getMessage(this, "own-permission-description"), PermissionDefault.TRUE);
-    own.addParent(this.getRootPermission(), false);
-    this.getPermissionManager().addPermission(own, false);
-    others = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "others-permission-name"), this.getLocalisation().getMessage(this, "others-permission-description"), PermissionDefault.OP);
-    others.addParent(this.getRootPermission(), false);
-    this.getPermissionManager().addPermission(others, false);
-    cooldown = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "cooldown-permission-name"), this.getLocalisation().getMessage(this, "cooldown-permission-description"), PermissionDefault.TRUE);
-    cooldown.addParent(this.getRootPermission(), false);
-    this.getPermissionManager().addPermission(cooldown, false);
-    // provide access to this command by default
-    this.getPermissionManager().getPermission(prefix + this.getName()).setDefault(PermissionDefault.TRUE);
+  protected void registerPermissions() {
+    own = this.getPermissionManager().createPermission(this, "own", PermissionDefault.TRUE, this.getPermissions().get(0), true);
+    this.addPermission(own);
+    others = this.getPermissionManager().createPermission(this, "others", PermissionDefault.OP, this.getPermissions().get(0), true);
+    this.addPermission(others);
+    cooldown = this.getPermissionManager().createPermission(this, "cooldown", PermissionDefault.NOT_OP, this.getPermissions().get(0), false);
+    this.addPermission(cooldown);
   }
   
   private UUID getWorldUUID(String worldName) throws CommandArgumentException {
@@ -158,17 +153,31 @@ public class TeleportCommand extends AbstractCommand {
   
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
     this.player = (Player) sender;
-    if (arguments.length == 0) {
-      this.playerName = player.getName();
-      this.worldUUID = player.getLocation().getWorld().getUID();
-    } else if (arguments.length == 1) {
+    if (arguments.length == 1) {
       String playerName = matchPlayerName(arguments[0]);
       this.playerName = playerName;
       this.worldUUID = player.getLocation().getWorld().getUID();
     } else if (arguments.length == 2) {
       this.playerName = matchPlayerName(arguments[0]);
       this.worldUUID = getWorldUUID(arguments[1]);
+    } else {
+      this.playerName = player.getName();
+      this.worldUUID = player.getLocation().getWorld().getUID();
     }
+  }
+
+  public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] arguments) {
+    List<String> list = new ArrayList<String>();
+    if (arguments.length <= 1) {
+      for (Player player : this.server.getOnlinePlayers()) {
+        list.add(player.getName());
+      }
+    } else if (arguments.length == 2) {
+      for (World world : this.server.getWorlds()) {
+        list.add(world.getName());
+      }
+    } 
+    return list;
   }
 
 }

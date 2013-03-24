@@ -11,12 +11,10 @@ public class HomeCommand implements CommandExecutor {
 
   private final AbstractCommand teleport; 
   private final AbstractCommand set;
-  private final Hearthstone plugin; 
   
   public HomeCommand(Hearthstone plugin, AbstractCommand teleport, AbstractCommand set) {
     this.teleport = teleport;
     this.set = set;
-    this.plugin = plugin;
   }
   
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

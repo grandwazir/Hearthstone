@@ -18,6 +18,7 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.avaje.ebean.EbeanServer;
@@ -25,6 +26,7 @@ import com.sk89q.worldguard.protection.GlobalRegionManager;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -54,15 +56,12 @@ public class SetCommand extends AbstractCommand {
   /** The player who is setting the home */
   private Player player;
   
-  private Permission own;
-
-  private Permission others;
-  
   public SetCommand(Hearthstone plugin) {
-    super(plugin, true);
+    super(plugin);
     this.manager = plugin.getGlobalRegionManager();
     this.server = plugin.getServer();
     this.database = plugin.getDatabase();
+    this.registerPermissions();
   }
 
   private void createHome() throws CommandUsageException {
@@ -87,19 +86,19 @@ public class SetCommand extends AbstractCommand {
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
     this.location = ((Player) sender).getLocation(); 
-    if (sender.hasPermission(own) && this.playerName.equalsIgnoreCase(sender.getName())) {
+    if (sender.hasPermission(this.getPermissions().get(1)) && this.playerName.equalsIgnoreCase(sender.getName())) {
       this.createHome();
       sender.sendMessage(this.getLocalisation().getMessage(this, "home-set"));
       return;
     } else if (this.playerName.equalsIgnoreCase(sender.getName())) {
-      throw new CommandPermissionException(null, others);
+      throw new CommandPermissionException(null, this.getPermissions().get(1));
     }
     
-    if (sender.hasPermission(others) && !this.playerName.equalsIgnoreCase(sender.getName())) {
+    if (sender.hasPermission(this.getPermissions().get(2)) && !this.playerName.equalsIgnoreCase(sender.getName())) {
       this.createHome();
       sender.sendMessage(this.getLocalisation().getMessage(this, "home-set-others", this.playerName));
     } else if (!this.playerName.equalsIgnoreCase(sender.getName())) {
-      throw new CommandPermissionException(null, others);
+      throw new CommandPermissionException(null, this.getPermissions().get(2));
     }
 
   }
@@ -130,18 +129,11 @@ public class SetCommand extends AbstractCommand {
     }
   }
   
-  protected void registerPermissions(boolean wildcard) {
-    super.registerPermissions(wildcard);
-    final String prefix = this.getPermissionManager().getRootPermission().getName().replace("*", "");
-    own = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "own-permission-name"), this.getLocalisation().getMessage(this, "own-permission-description"), PermissionDefault.TRUE);
-    own.addParent(this.getRootPermission(), true);
-    this.getPermissionManager().addPermission(own, false);
-    // add ability to pardon the bans of others
-    others = new Permission(prefix + this.getName() + "." + this.getLocalisation().getMessage(this, "others-permission-name"), this.getLocalisation().getMessage(this, "others-permission-description"), PermissionDefault.OP);
-    others.addParent(this.getRootPermission(), true);
-    this.getPermissionManager().addPermission(others, false);
-    // provide access to this command by default
-    this.getPermissionManager().getPermission(prefix + this.getName()).setDefault(PermissionDefault.TRUE);
+  private void registerPermissions() {
+    Permission own = this.getPermissionManager().createPermission(this, "own", PermissionDefault.TRUE, this.getPermissions().get(0), true);
+    this.addPermission(own);
+    Permission others = this.getPermissionManager().createPermission(this, "others", PermissionDefault.OP, this.getPermissions().get(0), true);
+    this.addPermission(others);
   }
   
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
@@ -151,6 +143,16 @@ public class SetCommand extends AbstractCommand {
     } else {
       this.playerName = matchPlayerName(arguments[0]);
     }
+  }
+
+  public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] arguments) {
+    List<String> list = new ArrayList<String>();
+    if (arguments.length == 1) {
+      for (Player player : this.server.getOnlinePlayers()) {
+        list.add(player.getName());
+      }
+    }
+    return list;
   }
 
   
