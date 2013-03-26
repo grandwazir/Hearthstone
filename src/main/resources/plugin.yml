@@ -1,0 +1,12 @@
+name: ${project.name}
+description: ${project.description}
+version: ${project.version}
+author: James Richardson (grandwazir)
+website: https://github.com/grandwazir/${project.name} 
+main: name.richardson.james.hearthstone.Hearthstone
+database: true
+commands:
+  home:
+    description: Used as an alias for hs teleport
+  hs:
+    description: The main root command for ${project.name}

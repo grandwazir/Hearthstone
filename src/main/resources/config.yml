@@ -1,0 +1,6 @@
+debugging: false
+automatic-updates:
+  enabled: true
+  method: automatic
+  branch: stable
+cooldown: 5m
