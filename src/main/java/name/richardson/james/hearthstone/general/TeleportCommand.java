@@ -21,6 +21,8 @@ package name.richardson.james.hearthstone.general;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.bukkit.Location;
@@ -168,15 +170,20 @@ public class TeleportCommand extends AbstractCommand {
 
   public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] arguments) {
     List<String> list = new ArrayList<String>();
+    Set<String> temp = new TreeSet<String>();
     if (arguments.length <= 1) {
       for (Player player : this.server.getOnlinePlayers()) {
-        list.add(player.getName());
+        temp.add(player.getName());
+      }
+      if (arguments[0].length() >= 3) {
+        temp.addAll(HomeRecord.findHomeRecordsWhenOwnerStartsWith(database, arguments[0]));
       }
     } else if (arguments.length == 2) {
       for (World world : this.server.getWorlds()) {
-        list.add(world.getName());
+        temp.add(world.getName());
       }
     } 
+    list.addAll(temp);
     return list;
   }
 

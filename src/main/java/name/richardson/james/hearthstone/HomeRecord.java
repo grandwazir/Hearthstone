@@ -18,6 +18,7 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +45,15 @@ public class HomeRecord {
 
   public static List<HomeRecord> findHomeRecordsByOwner(EbeanServer database, final String playerName) {
     return database.find(HomeRecord.class).where().ieq("createdBy", playerName).findList();
+  }
+  
+  public static List<String> findHomeRecordsWhenOwnerStartsWith(EbeanServer database, final String playerName) {
+    List<String> names = new ArrayList<String>();
+    List<HomeRecord> records = database.find(HomeRecord.class).where().istartsWith("createdBy", playerName).findList();
+    for (HomeRecord record : records) {
+      names.add(record.getCreatedBy());
+    }
+    return names;
   }
 
   public static List<HomeRecord> findHomeRecordsByOwnerAndWorld(EbeanServer database, final String playerName, final UUID uuid) {
