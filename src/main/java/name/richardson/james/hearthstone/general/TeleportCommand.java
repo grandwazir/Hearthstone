@@ -19,14 +19,17 @@
 package name.richardson.james.hearthstone.general;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -46,6 +49,8 @@ import name.richardson.james.hearthstone.HomeRecord;
 
 public class TeleportCommand extends AbstractCommand {
 
+  private static final int ANIMATION_DISTANCE = 32;
+  
   private final Server server;
   
   private final EbeanServer database;
@@ -120,10 +125,16 @@ public class TeleportCommand extends AbstractCommand {
     if (!homes.isEmpty()) {
       if (isLocationObstructed(homes.get(0).getLocation(server))) throw new CommandUsageException(this.getLocalisation().getMessage(this, "home-is-obstructed"));
       cooldownTracker.put(playerName, System.currentTimeMillis() + cooldownTime);
+      this.playAnimation();
       player.teleport(homes.get(0).getLocation(server));
     } else {
       throw new CommandUsageException(this.getLocalisation().getMessage(this, "no-home-set", playerName));
     }
+  }
+
+  private void playAnimation() {
+    this.player.getLocation().getWorld().playEffect(player.getLocation(), Effect.ENDER_SIGNAL, 0);
+    this.player.getLocation().getWorld().playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
   }
 
   private String matchPlayerName(String playerName) {
