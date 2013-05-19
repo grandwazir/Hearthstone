@@ -110,7 +110,7 @@ public class Hearthstone extends AbstractPlugin {
     this.getCommand("hs").setExecutor(commandManager);
     SetCommand setCommand = new SetCommand(this);
     commandManager.addCommand(setCommand);
-    TeleportCommand teleportCommand = new TeleportCommand(this);
+    TeleportCommand teleportCommand = new TeleportCommand(this, this.configuration.getWarmUp());
     commandManager.addCommand(teleportCommand);
     this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
   }

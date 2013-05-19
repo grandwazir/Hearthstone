@@ -4,3 +4,4 @@ automatic-updates:
   method: automatic
   branch: stable
 cooldown: 5m
+warmup: 3s

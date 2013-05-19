@@ -19,7 +19,6 @@
 package name.richardson.james.hearthstone.general;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +35,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.Plugin;
 
 import com.avaje.ebean.EbeanServer;
 
@@ -46,6 +46,7 @@ import name.richardson.james.bukkit.utilities.command.CommandUsageException;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
 import name.richardson.james.hearthstone.Hearthstone;
 import name.richardson.james.hearthstone.HomeRecord;
+import name.richardson.james.hearthstone.ScheduledTeleport;
 
 public class TeleportCommand extends AbstractCommand {
 
@@ -75,9 +76,18 @@ public class TeleportCommand extends AbstractCommand {
   
   private Permission cooldown;
 
-  public TeleportCommand(Hearthstone plugin) {
+  private long warmupTicks;
+
+  private Plugin plugin;
+
+  private String warmupTime;
+
+  public TeleportCommand(Hearthstone plugin, long warmup) {
     super(plugin);
     this.server = plugin.getServer();
+    this.plugin = plugin;
+    this.warmupTime = TimeFormatter.millisToLongDHMS(warmup);
+    this.warmupTicks = (warmup / 1000) * 20;
     this.database = plugin.getDatabase();
     this.cooldownTracker = plugin.getCooldownTracker();
     this.cooldownTime = plugin.getHearthstoneConfiguration().getCooldown();
@@ -125,17 +135,13 @@ public class TeleportCommand extends AbstractCommand {
     if (!homes.isEmpty()) {
       if (isLocationObstructed(homes.get(0).getLocation(server))) throw new CommandUsageException(this.getLocalisation().getMessage(this, "home-is-obstructed"));
       cooldownTracker.put(playerName, System.currentTimeMillis() + cooldownTime);
-      this.playAnimation();
-      player.teleport(homes.get(0).getLocation(server));
+      this.server.getScheduler().scheduleSyncDelayedTask(this.plugin, new ScheduledTeleport(this.player, homes.get(0).getLocation(server), this.cooldownTracker, cooldownTime), this.warmupTicks);
+      this.player.sendMessage(this.getLocalisation().getMessage(this, "teleport-warmup", this.warmupTime));
     } else {
       throw new CommandUsageException(this.getLocalisation().getMessage(this, "no-home-set", playerName));
     }
   }
 
-  private void playAnimation() {
-    this.player.getLocation().getWorld().playEffect(player.getLocation(), Effect.ENDER_SIGNAL, 0);
-    this.player.getLocation().getWorld().playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
-  }
 
   private String matchPlayerName(String playerName) {
     List<Player> matches = this.server.matchPlayer(playerName);
