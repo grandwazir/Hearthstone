@@ -105,7 +105,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 	}
 
 	public void run() {
-		if (!(this.hasPlayerMoved()) && !(this.hasPlayerTakenDamage()) && this.isLocationObstructed()) {
+		if (!(this.hasPlayerMoved()) && !(this.hasPlayerTakenDamage()) && !(this.isLocationObstructed())) {
 			this.player.getLocation().getWorld().playEffect(this.player.getLocation(), TELEPORT_SUCCESS_EFFECT, 0);
 			this.player.getLocation().getWorld().playSound(this.player.getLocation(), TELEPORT_SUCCESS_SOUND, 1, 0);
 			this.player.teleport(this.home.getLocation());

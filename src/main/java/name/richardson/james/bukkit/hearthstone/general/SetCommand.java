@@ -75,7 +75,7 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		}
 		if (this.hasPermission(sender) && this.createHome()) {
 			this.createHome();
-			sender.sendMessage(this.getMessage("notice.home-set"));
+			sender.sendMessage(this.getMessage("notice.home-set", this.playerName));
 		} else {
 			sender.sendMessage(this.getMessage("warning.permission-denied"));
 		}

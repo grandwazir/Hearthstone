@@ -65,6 +65,7 @@ public class TeleportCommand extends AbstractCommand implements TabExecutor {
 		super();
 		this.server = plugin.getServer();
 		this.database = plugin.getDatabase();
+		// set permission defaults
 		Bukkit.getPluginManager().getPermission("hearthstone.teleport.own").setDefault(PermissionDefault.TRUE);
 		Bukkit.getPluginManager().getPermission("hearthstone.teleport.cooldown").setDefault(PermissionDefault.TRUE);
 		Bukkit.getPluginManager().getPermission("hearthstone.teleport.warmup").setDefault(PermissionDefault.TRUE);
