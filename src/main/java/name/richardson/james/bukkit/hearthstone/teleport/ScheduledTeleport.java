@@ -158,7 +158,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 	private void schedule() {
 		if (this.player.hasPermission("hearthstone.teleport.warmup")) {
 			this.player.sendMessage(this.getMessage("notice.teleport-warmup", ScheduledTeleport.warmupTime));
-			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(ScheduledTeleport.getPlugin(), this, ScheduledTeleport.warmup);
+			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(ScheduledTeleport.getPlugin(), this, ((ScheduledTeleport.warmup / 1000) * 20));
 		} else {
 			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(plugin, this);
 		}

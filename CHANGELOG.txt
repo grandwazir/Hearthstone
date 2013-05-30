@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.4.1-SNAPSHOT)
 
+2013-05-30 18:12:06 +0100    set static variables on ScheduledTeleport (James Richardson)
 2013-05-30 18:10:48 +0100    remove prefix from old keys (James Richardson)
 2013-05-30 18:08:00 +0100    set command now breaks correctly and scheduled teleport schedules itself (James Richardson)
 2013-05-30 18:03:38 +0100    prevent players setting homes at spawn (James Richardson)
