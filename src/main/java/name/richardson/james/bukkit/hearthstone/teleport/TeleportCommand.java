@@ -23,12 +23,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionDefault;
 
 import com.avaje.ebean.EbeanServer;
 
@@ -63,6 +65,9 @@ public class TeleportCommand extends AbstractCommand implements TabExecutor {
 		super();
 		this.server = plugin.getServer();
 		this.database = plugin.getDatabase();
+		Bukkit.getPluginManager().getPermission("hearthstone.teleport.own").setDefault(PermissionDefault.TRUE);
+		Bukkit.getPluginManager().getPermission("hearthstone.teleport.cooldown").setDefault(PermissionDefault.TRUE);
+		Bukkit.getPluginManager().getPermission("hearthstone.teleport.warmup").setDefault(PermissionDefault.TRUE);
 	}
 
 	public void execute(final List<String> arguments, final CommandSender sender) {
