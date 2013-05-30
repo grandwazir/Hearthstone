@@ -13,7 +13,8 @@
   <parent>
      <groupId>name.richardson.james.bukkit</groupId>
      <artifactId>default-pom</artifactId>
-     <version>3</version>
+     <version>5</version>
+     <relativePath></relativePath>
   </parent>
 
   <repositories>
@@ -32,7 +33,7 @@
      <dependency>
            <groupId>name.richardson.james.bukkit</groupId>
            <artifactId>bukkit-utilities</artifactId>
-           <version>4.2.0</version>
+           <version>5.0.1-SNAPSHOT</version>
      </dependency>
      <dependency>
            <groupId>com.sk89q</groupId>
@@ -63,9 +64,10 @@
                   <relocations>
                     <relocation>
                       <pattern>name.richardson.james.bukkit.utilities</pattern>
-                      <shadedPattern>name.richardson.james.bukkit.banhammer.utilities</shadedPattern>
+                      <shadedPattern>name.richardson.james.bukkit.hearthstone.utilities</shadedPattern>
                     </relocation>
                   </relocations>
+                  <minimizeJar>true</minimizeJar>
                 </configuration>
               </execution>
             </executions>
