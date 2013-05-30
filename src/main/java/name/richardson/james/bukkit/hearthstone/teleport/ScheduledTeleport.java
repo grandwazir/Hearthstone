@@ -85,7 +85,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 		this.health = player.getHealth();
 		this.lastLocation = player.getLocation().clone();
 		this.home = location;
-		if (this.hasCooldown()) {
+		if (!this.hasCooldown()) {
 			this.schedule();
 		}
 	}

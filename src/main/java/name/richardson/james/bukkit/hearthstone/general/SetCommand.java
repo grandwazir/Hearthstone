@@ -73,7 +73,7 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		} else {
 			this.playerName = arguments.remove(0);
 		}
-		if (this.hasPermission(sender)) {
+		if (this.hasPermission(sender) && this.createHome()) {
 			this.createHome();
 			sender.sendMessage(this.getMessage("notice.home-set"));
 		} else {
@@ -94,17 +94,17 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		return this.onTabComplete(Arrays.asList(arguments), sender);
 	}
 
-	private void createHome() {
+	private boolean createHome() {
 		final Home home = new Home(this.player.getLocation());
 		// check if location is obstructed
 		if (home.isObstructed()) {
 			this.player.sendMessage(this.getMessage("error.location-obstructed"));
-			return;
+			return false;
 		}
 		// check if the location is buildable
 		if (!home.isBuildable(this.player)) {
 			this.player.sendMessage(this.getMessage("error.location-indestructible"));
-			return;
+			return false;
 		}
 		// delete any existing homes
 		HomeRecord.deleteHomes(this.database, this.playerName, home.getLocation().getWorld().getUID());
@@ -119,6 +119,7 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		record.setPitch(home.getLocation().getPitch());
 		record.setWorldUUID(home.getLocation().getWorld().getUID());
 		this.database.save(record);
+		return true;
 	}
 
 	private boolean hasPermission(final CommandSender sender) {
