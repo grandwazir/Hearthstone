@@ -9,7 +9,7 @@ import com.sk89q.worldguard.protection.GlobalRegionManager;
 
 public class Home {
 
-	private static GlobalRegionManager regionManager;
+	private static GlobalRegionManager regionManager = null;
 
 	public static void setGlobalRegionManager(final GlobalRegionManager regionManager) {
 		Home.regionManager = regionManager;
@@ -31,7 +31,12 @@ public class Home {
 	}
 
 	public boolean isBuildable(final Player player) {
-		return Home.regionManager.canBuild(player, this.location);
+		if (Home.regionManager != null) {
+			return Home.regionManager.canBuild(player, this.location);
+		} else {
+			final Location spawnLocation = player.getLocation().getWorld().getSpawnLocation();
+			return this.location.distance(spawnLocation) > Bukkit.getSpawnRadius() ? true : false;
+		}
 	}
 
 	public boolean isObstructed() {
