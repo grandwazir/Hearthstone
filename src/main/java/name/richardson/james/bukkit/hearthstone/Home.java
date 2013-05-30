@@ -1,4 +1,4 @@
-package name.richardson.james.hearthstone.general;
+package name.richardson.james.bukkit.hearthstone;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

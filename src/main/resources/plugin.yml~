@@ -3,7 +3,7 @@ description: ${project.description}
 version: ${project.version}
 author: James Richardson (grandwazir)
 website: https://github.com/grandwazir/${project.name} 
-main: name.richardson.james.bukkit.hearthstone.Hearthstone
+main: name.richardson.james.bukkithearthstone.Hearthstone
 database: true
 commands:
   home:

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * Hearthstone. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package name.richardson.james.hearthstone;
+package name.richardson.james.bukkit.hearthstone;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,13 +29,14 @@ import java.util.Map;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 
+import name.richardson.james.bukkit.hearthstone.general.HomeCommand;
+import name.richardson.james.bukkit.hearthstone.general.SetCommand;
+import name.richardson.james.bukkit.hearthstone.persistence.HearthstoneConfiguration;
+import name.richardson.james.bukkit.hearthstone.persistence.HomeRecord;
+import name.richardson.james.bukkit.hearthstone.teleport.TeleportCommand;
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
 import name.richardson.james.bukkit.utilities.plugin.PluginPermissions;
-import name.richardson.james.hearthstone.general.Home;
-import name.richardson.james.hearthstone.general.HomeCommand;
-import name.richardson.james.hearthstone.general.SetCommand;
-import name.richardson.james.hearthstone.general.TeleportCommand;
 
 @PluginPermissions(permissions = { "hearthstone" })
 public class Hearthstone extends AbstractPlugin {

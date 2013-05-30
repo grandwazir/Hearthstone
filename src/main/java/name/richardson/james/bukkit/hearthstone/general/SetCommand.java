@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * Hearthstone. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package name.richardson.james.hearthstone.general;
+package name.richardson.james.bukkit.hearthstone.general;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -30,13 +30,14 @@ import org.bukkit.entity.Player;
 
 import com.avaje.ebean.EbeanServer;
 
+import name.richardson.james.bukkit.hearthstone.Hearthstone;
+import name.richardson.james.bukkit.hearthstone.Home;
+import name.richardson.james.bukkit.hearthstone.persistence.HomeRecord;
 import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandMatchers;
 import name.richardson.james.bukkit.utilities.command.CommandPermissions;
 import name.richardson.james.bukkit.utilities.matchers.OfflinePlayerMatcher;
 import name.richardson.james.bukkit.utilities.matchers.WorldMatcher;
-import name.richardson.james.hearthstone.Hearthstone;
-import name.richardson.james.hearthstone.HomeRecord;
 
 @CommandMatchers(matchers = { OfflinePlayerMatcher.class, WorldMatcher.class })
 @CommandPermissions(permissions = { "hearthstone.set", "hearthstone.set.own", "hearthstone.set.others" })
@@ -59,6 +60,10 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 	}
 
 	public void execute(final List<String> arguments, final CommandSender sender) {
+		if (!(sender instanceof Player)) {
+			sender.sendMessage(this.getMessage("error.player-command-sender-required"));
+			return;
+		}
 		this.player = this.server.getPlayerExact(sender.getName());
 		if (arguments.isEmpty()) {
 			this.playerName = sender.getName();
@@ -67,8 +72,9 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		}
 		if (this.hasPermission(sender)) {
 			this.createHome();
+			sender.sendMessage(this.getMessage("notice.home-set"));
 		} else {
-			sender.sendMessage(this.getMessage("misc.warning.permission-denied"));
+			sender.sendMessage(this.getMessage("warning.permission-denied"));
 		}
 	}
 
@@ -76,7 +82,7 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		if (this.isAuthorized(sender)) {
 			this.execute(new LinkedList<String>(Arrays.asList(arguments)), sender);
 		} else {
-			sender.sendMessage(this.getMessage("misc.warning.permission-denied"));
+			sender.sendMessage(this.getMessage("warning.permission-denied"));
 		}
 		return true;
 	}
@@ -89,12 +95,12 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 		final Home home = new Home(this.player.getLocation());
 		// check if location is obstructed
 		if (home.isObstructed()) {
-			this.player.sendMessage("shared.error.location-obstructed");
+			this.player.sendMessage(this.getMessage("error.location-obstructed"));
 			return;
 		}
 		// check if the location is buildable
 		if (!home.isBuildable(this.player)) {
-			this.player.sendMessage("shared.error.location-indestructible");
+			this.player.sendMessage(this.getMessage("error.location-indestructible"));
 			return;
 		}
 		// delete any existing homes

@@ -1,4 +1,4 @@
-package name.richardson.james.hearthstone.general;
+package name.richardson.james.bukkit.hearthstone.general;
 
 import java.util.List;
 
@@ -6,7 +6,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 
-import name.richardson.james.hearthstone.Hearthstone;
+import name.richardson.james.bukkit.hearthstone.Hearthstone;
+import name.richardson.james.bukkit.hearthstone.teleport.TeleportCommand;
 
 public class HomeCommand implements TabExecutor {
 
