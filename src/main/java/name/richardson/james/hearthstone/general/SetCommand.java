@@ -18,144 +18,105 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
-import com.avaje.ebean.EbeanServer;
-import com.sk89q.worldguard.protection.GlobalRegionManager;
-
-import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
+
+import com.avaje.ebean.EbeanServer;
 
 import name.richardson.james.bukkit.utilities.command.AbstractCommand;
-import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
-import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
-import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.bukkit.utilities.command.CommandMatchers;
+import name.richardson.james.bukkit.utilities.command.CommandPermissions;
+import name.richardson.james.bukkit.utilities.matchers.OfflinePlayerMatcher;
+import name.richardson.james.bukkit.utilities.matchers.WorldMatcher;
 import name.richardson.james.hearthstone.Hearthstone;
 import name.richardson.james.hearthstone.HomeRecord;
 
-public class SetCommand extends AbstractCommand {
+@CommandMatchers(matchers = { OfflinePlayerMatcher.class, WorldMatcher.class })
+@CommandPermissions(permissions = { "hearthstone.set", "hearthstone.set.own", "hearthstone.set.others" })
+public class SetCommand extends AbstractCommand implements TabExecutor {
 
-  private final Server server;
-  
-  private final EbeanServer database;
-  
-  /** The name of the players home we are setting */
-  private String playerName;
+	private final Server server;
 
-  /** The location of the home */
-  private Location location;
-  
-  private final GlobalRegionManager manager;
-  
-  /** The player who is setting the home */
-  private Player player;
-  
-  public SetCommand(Hearthstone plugin) {
-    super(plugin);
-    this.manager = plugin.getGlobalRegionManager();
-    this.server = plugin.getServer();
-    this.database = plugin.getDatabase();
-    this.registerPermissions();
-  }
+	private final EbeanServer database;
 
-  private void createHome() throws CommandUsageException {
-    // check if location is obstructed
-    if (isLocationObstructed()) throw new CommandUsageException(this.getLocalisation().getMessage(this, "location-is-obstructed"));
-    // check if the location is buildable
-    if (!isPlayerAllowedToBuild()) throw new CommandUsageException(this.getLocalisation().getMessage(this, "not-allowed-to-build-here"));
-    // delete any existing homes
-    HomeRecord.deleteHomes(database, playerName, location.getWorld().getUID());
-    // create the home
-    final HomeRecord record = new HomeRecord();
-    record.setCreatedAt(System.currentTimeMillis());
-    record.setCreatedBy(playerName);
-    record.setX(location.getX());
-    record.setY(location.getY());
-    record.setZ(location.getZ());
-    record.setYaw(location.getYaw());
-    record.setPitch(location.getPitch());
-    record.setWorldUUID(location.getWorld().getUID());
-    database.save(record);
-  }
+	/** The name of the players home we are setting */
+	private String playerName;
 
-  public void execute(CommandSender sender) throws CommandArgumentException, CommandUsageException, CommandPermissionException {
-    this.location = ((Player) sender).getLocation(); 
-    if (sender.hasPermission(this.getPermissions().get(1)) && this.playerName.equalsIgnoreCase(sender.getName())) {
-      this.createHome();
-      sender.sendMessage(this.getLocalisation().getMessage(this, "home-set"));
-      return;
-    } else if (this.playerName.equalsIgnoreCase(sender.getName())) {
-      throw new CommandPermissionException(null, this.getPermissions().get(1));
-    }
-    
-    if (sender.hasPermission(this.getPermissions().get(2)) && !this.playerName.equalsIgnoreCase(sender.getName())) {
-      this.createHome();
-      sender.sendMessage(this.getLocalisation().getMessage(this, "home-set-others", this.playerName));
-    } else if (!this.playerName.equalsIgnoreCase(sender.getName())) {
-      throw new CommandPermissionException(null, this.getPermissions().get(2));
-    }
+	/** The player who is setting the home */
+	private Player player;
 
-  }
+	public SetCommand(final Hearthstone plugin) {
+		super();
+		this.server = plugin.getServer();
+		this.database = plugin.getDatabase();
+	}
 
-  private boolean isLocationObstructed() {
-    Location location = this.location.clone();
-    // check the block that the player's legs occupy.
-    if (!location.getBlock().isEmpty()) return true;
-    // check the block that the player's head occupies.
-    if (!location.add(0, 1, 0).getBlock().isEmpty()) return true;
-    return false;
-  }
+	public void execute(final List<String> arguments, final CommandSender sender) {
+		this.player = this.server.getPlayerExact(sender.getName());
+		if (arguments.isEmpty()) {
+			this.playerName = sender.getName();
+		} else {
+			this.playerName = arguments.remove(0);
+		}
+		if (this.hasPermission(sender)) {
+			this.createHome();
+		} else {
+			sender.sendMessage(this.getMessage("misc.warning.permission-denied"));
+		}
+	}
 
-  private boolean isPlayerAllowedToBuild() {
-    if (this.manager != null) {
-      return manager.canBuild(this.player, this.location);
-    } else {
-      return true;
-    }
-  }
+	public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] arguments) {
+		if (this.isAuthorized(sender)) {
+			this.execute(new LinkedList<String>(Arrays.asList(arguments)), sender);
+		} else {
+			sender.sendMessage(this.getMessage("misc.warning.permission-denied"));
+		}
+		return true;
+	}
 
-  private String matchPlayerName(String playerName) {
-    List<Player> matches = this.server.matchPlayer(playerName);
-    if (matches.isEmpty()) {
-      return playerName;
-    } else {
-      return matches.get(0).getName();
-    }
-  }
-  
-  private void registerPermissions() {
-    Permission own = this.getPermissionManager().createPermission(this, "own", PermissionDefault.TRUE, this.getPermissions().get(0), true);
-    this.addPermission(own);
-    Permission others = this.getPermissionManager().createPermission(this, "others", PermissionDefault.OP, this.getPermissions().get(0), true);
-    this.addPermission(others);
-  }
-  
-  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
-    this.player = (Player) sender;
-    if (arguments.length == 0) {
-      this.playerName = sender.getName(); 
-    } else {
-      this.playerName = matchPlayerName(arguments[0]);
-    }
-  }
+	public List<String> onTabComplete(final CommandSender sender, final Command command, final String label, final String[] arguments) {
+		return this.onTabComplete(Arrays.asList(arguments), sender);
+	}
 
-  public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] arguments) {
-    List<String> list = new ArrayList<String>();
-    if (arguments.length == 1) {
-      for (Player player : this.server.getOnlinePlayers()) {
-        list.add(player.getName());
-      }
-    }
-    return list;
-  }
+	private void createHome() {
+		final Home home = new Home(this.player.getLocation());
+		// check if location is obstructed
+		if (home.isObstructed()) {
+			this.player.sendMessage("shared.error.location-obstructed");
+			return;
+		}
+		// check if the location is buildable
+		if (!home.isBuildable(this.player)) {
+			this.player.sendMessage("shared.error.location-indestructible");
+			return;
+		}
+		// delete any existing homes
+		HomeRecord.deleteHomes(this.database, this.playerName, home.getLocation().getWorld().getUID());
+		// create the home
+		final HomeRecord record = new HomeRecord();
+		record.setCreatedAt(System.currentTimeMillis());
+		record.setCreatedBy(this.playerName);
+		record.setX(home.getLocation().getX());
+		record.setY(home.getLocation().getY());
+		record.setZ(home.getLocation().getZ());
+		record.setYaw(home.getLocation().getYaw());
+		record.setPitch(home.getLocation().getPitch());
+		record.setWorldUUID(home.getLocation().getWorld().getUID());
+		this.database.save(record);
+	}
 
-  
-
+	private boolean hasPermission(final CommandSender sender) {
+		final boolean isSenderTargetingSelf = (this.playerName.equalsIgnoreCase(sender.getName())) ? true : false;
+		if (sender.hasPermission("hearthstone.set.own") && isSenderTargetingSelf) { return true; }
+		if (sender.hasPermission("hearthstone.set.others") && !isSenderTargetingSelf) { return true; }
+		return false;
+	}
 
 }

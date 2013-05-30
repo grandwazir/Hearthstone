@@ -37,120 +37,120 @@ import org.bukkit.World;
 @Table(name = "hearthstone_homes")
 public class HomeRecord {
 
-  // this is to get around a bug where optimistic lock errors will occur if you
-  // attempt to delete the records normally
-  public static int deleteHomes(EbeanServer database, String playerName, final UUID uuid) {
-    return database.createSqlUpdate("DELETE from hearthstone_homes WHERE world_uuid='" + uuid.toString() + "' AND created_by='" + playerName + "'").execute();
-  }
+	// this is to get around a bug where optimistic lock errors will occur if you
+	// attempt to delete the records normally
+	public static int deleteHomes(EbeanServer database, String playerName, final UUID uuid) {
+		return database.createSqlUpdate("DELETE from hearthstone_homes WHERE world_uuid='" + uuid.toString() + "' AND created_by='" + playerName + "'").execute();
+	}
 
-  public static List<HomeRecord> findHomeRecordsByOwner(EbeanServer database, final String playerName) {
-    return database.find(HomeRecord.class).where().ieq("createdBy", playerName).findList();
-  }
-  
-  public static List<String> findHomeRecordsWhenOwnerStartsWith(EbeanServer database, final String playerName) {
-    List<String> names = new ArrayList<String>();
-    List<HomeRecord> records = database.find(HomeRecord.class).where().istartsWith("createdBy", playerName).findList();
-    for (HomeRecord record : records) {
-      names.add(record.getCreatedBy());
-    }
-    return names;
-  }
+	public static List<HomeRecord> findHomeRecordsByOwner(EbeanServer database, final String playerName) {
+		return database.find(HomeRecord.class).where().ieq("createdBy", playerName).findList();
+	}
 
-  public static List<HomeRecord> findHomeRecordsByOwnerAndWorld(EbeanServer database, final String playerName, final UUID uuid) {
-    return database.find(HomeRecord.class).where().ieq("createdBy", playerName).eq("worldUUID", uuid).findList();
-  }
+	public static List<String> findHomeRecordsWhenOwnerStartsWith(EbeanServer database, final String playerName) {
+		List<String> names = new ArrayList<String>();
+		List<HomeRecord> records = database.find(HomeRecord.class).where().istartsWith("createdBy", playerName).findList();
+		for (HomeRecord record : records) {
+			names.add(record.getCreatedBy());
+		}
+		return names;
+	}
 
-  @Id
-  private long createdAt;
+	public static List<HomeRecord> findHomeRecordsByOwnerAndWorld(EbeanServer database, final String playerName, final UUID uuid) {
+		return database.find(HomeRecord.class).where().ieq("createdBy", playerName).eq("worldUUID", uuid).findList();
+	}
 
-  @NotNull
-  private String createdBy;
+	@Id
+	private long createdAt;
 
-  @NotNull
-  private float pitch;
+	@NotNull
+	private String createdBy;
 
-  @NotNull
-  private UUID worldUUID;
+	@NotNull
+	private float pitch;
 
-  @NotNull
-  private double x;
+	@NotNull
+	private UUID worldUUID;
 
-  @NotNull
-  private double y;
+	@NotNull
+	private double x;
 
-  @NotNull
-  private float yaw;
+	@NotNull
+	private double y;
 
-  @NotNull
-  private double z;
+	@NotNull
+	private float yaw;
 
-  public long getCreatedAt() {
-    return this.createdAt;
-  }
+	@NotNull
+	private double z;
 
-  public String getCreatedBy() {
-    return this.createdBy;
-  }
+	public long getCreatedAt() {
+		return this.createdAt;
+	}
 
-  public Location getLocation(final Server server) {
-    final World world = server.getWorld(this.worldUUID);
-    return new Location(world, this.x, this.y, this.z, this.yaw, this.pitch);
-  }
+	public String getCreatedBy() {
+		return this.createdBy;
+	}
 
-  public float getPitch() {
-    return this.pitch;
-  }
+	public Location getLocation(final Server server) {
+		final World world = server.getWorld(this.worldUUID);
+		return new Location(world, this.x, this.y, this.z, this.yaw, this.pitch);
+	}
 
-  public UUID getWorldUUID() {
-    return this.worldUUID;
-  }
+	public float getPitch() {
+		return this.pitch;
+	}
 
-  public double getX() {
-    return this.x;
-  }
+	public UUID getWorldUUID() {
+		return this.worldUUID;
+	}
 
-  public double getY() {
-    return this.y;
-  }
+	public double getX() {
+		return this.x;
+	}
 
-  public float getYaw() {
-    return this.yaw;
-  }
+	public double getY() {
+		return this.y;
+	}
 
-  public double getZ() {
-    return this.z;
-  }
+	public float getYaw() {
+		return this.yaw;
+	}
 
-  public void setCreatedAt(final long createdAt) {
-    this.createdAt = createdAt;
-  }
+	public double getZ() {
+		return this.z;
+	}
 
-  public void setCreatedBy(final String createdBy) {
-    this.createdBy = createdBy;
-  }
+	public void setCreatedAt(final long createdAt) {
+		this.createdAt = createdAt;
+	}
 
-  public void setPitch(final float pitch) {
-    this.pitch = pitch;
-  }
+	public void setCreatedBy(final String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-  public void setWorldUUID(final UUID worldUUID) {
-    this.worldUUID = worldUUID;
-  }
+	public void setPitch(final float pitch) {
+		this.pitch = pitch;
+	}
 
-  public void setX(final double x) {
-    this.x = x;
-  }
+	public void setWorldUUID(final UUID worldUUID) {
+		this.worldUUID = worldUUID;
+	}
 
-  public void setY(final double y) {
-    this.y = y;
-  }
+	public void setX(final double x) {
+		this.x = x;
+	}
 
-  public void setYaw(final float yaw) {
-    this.yaw = yaw;
-  }
+	public void setY(final double y) {
+		this.y = y;
+	}
 
-  public void setZ(final double z) {
-    this.z = z;
-  }
+	public void setYaw(final float yaw) {
+		this.yaw = yaw;
+	}
+
+	public void setZ(final double z) {
+		this.z = z;
+	}
 
 }

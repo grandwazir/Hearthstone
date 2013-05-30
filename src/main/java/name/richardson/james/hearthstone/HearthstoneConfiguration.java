@@ -18,23 +18,25 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
-import name.richardson.james.bukkit.utilities.configuration.PluginConfiguration;
+import name.richardson.james.bukkit.utilities.configuration.SimplePluginConfiguration;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
 
-public class HearthstoneConfiguration extends PluginConfiguration {
+public class HearthstoneConfiguration extends SimplePluginConfiguration {
 
-  public HearthstoneConfiguration(Hearthstone plugin) throws IOException {
-    super(plugin);
-  }
+	public HearthstoneConfiguration(final File file, final InputStream defaults) throws IOException {
+		super(file, defaults);
+	}
 
-  public long getCooldown() {
-    return TimeFormatter.parseTime(this.getConfiguration().getString("cooldown"));
-  }
+	public long getCooldown() {
+		return TimeFormatter.parseTime(this.getConfiguration().getString("cooldown"));
+	}
 
-  public long getWarmUp() {
-    return TimeFormatter.parseTime(this.getConfiguration().getString("warmup"));
-  }
+	public long getWarmUp() {
+		return TimeFormatter.parseTime(this.getConfiguration().getString("warmup"));
+	}
 
 }

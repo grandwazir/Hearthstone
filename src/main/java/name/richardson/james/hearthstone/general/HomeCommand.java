@@ -1,18 +1,19 @@
 package name.richardson.james.hearthstone.general;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import java.util.List;
 
-import name.richardson.james.bukkit.utilities.command.AbstractCommand;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+
 import name.richardson.james.hearthstone.Hearthstone;
 
-public class HomeCommand implements CommandExecutor {
+public class HomeCommand implements TabExecutor {
 
-	private final AbstractCommand teleport;
-	private final AbstractCommand set;
+	private final TeleportCommand teleport;
+	private final SetCommand set;
 
-	public HomeCommand(final Hearthstone plugin, final AbstractCommand teleport, final AbstractCommand set) {
+	public HomeCommand(final Hearthstone plugin, final TeleportCommand teleport, final SetCommand set) {
 		this.teleport = teleport;
 		this.set = set;
 	}
@@ -27,6 +28,10 @@ public class HomeCommand implements CommandExecutor {
 				this.set.onCommand(sender, command, label, arguments);
 			}
 		return true;
+	}
+
+	public List<String> onTabComplete(final CommandSender arg0, final Command arg1, final String arg2, final String[] arg3) {
+		return null;
 	}
 
 	private String[] prepareArguments(final String[] args) {

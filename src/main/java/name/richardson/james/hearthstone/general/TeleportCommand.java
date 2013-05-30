@@ -18,190 +18,139 @@
  ******************************************************************************/
 package name.richardson.james.hearthstone.general;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 
-import org.bukkit.Effect;
-import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 
 import com.avaje.ebean.EbeanServer;
 
 import name.richardson.james.bukkit.utilities.command.AbstractCommand;
-import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
-import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
-import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.bukkit.utilities.command.CommandMatchers;
+import name.richardson.james.bukkit.utilities.command.CommandPermissions;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
+import name.richardson.james.bukkit.utilities.matchers.OfflinePlayerMatcher;
+import name.richardson.james.bukkit.utilities.matchers.WorldMatcher;
 import name.richardson.james.hearthstone.Hearthstone;
 import name.richardson.james.hearthstone.HomeRecord;
-import name.richardson.james.hearthstone.ScheduledTeleport;
+import name.richardson.james.hearthstone.scheduler.ScheduledTeleport;
 
-public class TeleportCommand extends AbstractCommand {
+@CommandPermissions(permissions = { "hearthstone.teleport", "hearthstone.teleport.cooldown", "hearthstone.teleport.warmup", "hearthstone.teleport.own",
+	"hearthstone.teleport.others" })
+@CommandMatchers(matchers = { OfflinePlayerMatcher.class, WorldMatcher.class })
+public class TeleportCommand extends AbstractCommand implements TabExecutor {
 
-  private static final int ANIMATION_DISTANCE = 32;
-  
-  private final Server server;
-  
-  private final EbeanServer database;
-  
-  private final Map<String, Long> cooldownTracker;
-  
-  //* The name of the player we are teleporting to *//
-  private String playerName;
-  
-  //* The UID of the world we are teleporting to *//
-  private UUID worldUUID;
-  
-  //* The player who is teleporting *//
-  private Player player;
-  
-  //* The cooldown to apply to the teleporting player *//
-  private long cooldownTime;
-  
-  private Permission own;
-  
-  private Permission others;
-  
-  private Permission cooldown;
+	private final Server server;
 
-  private long warmupTicks;
+	private final EbeanServer database;
 
-  private Plugin plugin;
+	private final Map<String, Long> cooldownTracker;
 
-  private String warmupTime;
+	// * The name of the player we are teleporting to *//
+	private String playerName;
 
-  public TeleportCommand(Hearthstone plugin, long warmup) {
-    super(plugin);
-    this.server = plugin.getServer();
-    this.plugin = plugin;
-    this.warmupTime = TimeFormatter.millisToLongDHMS(warmup);
-    this.warmupTicks = (warmup / 1000) * 20;
-    this.database = plugin.getDatabase();
-    this.cooldownTracker = plugin.getCooldownTracker();
-    this.cooldownTime = plugin.getHearthstoneConfiguration().getCooldown();
-    this.registerPermissions();
-  }
+	// * The UID of the world we are teleporting to *//
+	private UUID worldUUID;
 
-  public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
+	// * The player who is teleporting *//
+	private Player player;
 
-    if (!isPlayerCooldownExpired() && player.hasPermission(cooldown)) {
-      throw new CommandUsageException(this.getLocalisation().getMessage(this, "cooldown-not-expired", TimeFormatter.millisToLongDHMS(cooldownTracker.get(sender.getName()) - System.currentTimeMillis())));
-    }
-    
-    if (sender.hasPermission(own) && sender.getName().equalsIgnoreCase(playerName)) {
-      teleportPlayer();
-      return;
-    } else if (sender.hasPermission(others) && !sender.getName().equalsIgnoreCase(playerName)) {
-      teleportPlayer();
-      sender.sendMessage(this.getLocalisation().getMessage(this, "teleported-home", playerName));
-    } else {
-      throw new CommandPermissionException(this.getLocalisation().getMessage(this, "can-only-teleport-to-own-home"), others);
-    }
+	// * The cooldown to apply to the teleporting player *//
+	private final long cooldownTime;
 
-  }
+	private final long warmupTicks;
 
-  private boolean isPlayerCooldownExpired() {
-    final String playerName = player.getName().toLowerCase();
-    if (!cooldownTracker.containsKey(playerName)) return true;
-    final long cooldown = cooldownTracker.get(playerName);
-    if ((cooldown - System.currentTimeMillis()) > 0) return false;
-    cooldownTracker.remove(playerName);
-    return true;
-  }
-  
-  private boolean isLocationObstructed(Location orginalLocation) {
-    Location location = orginalLocation.clone();
-    // check the block that the player's legs occupy.
-    if (!location.getBlock().isEmpty()) return true;
-    // check the block that the player's head occupies.
-    if (!location.add(0, 1, 0).getBlock().isEmpty()) return true;
-    return false;
-  }
+	private final Plugin plugin;
 
-  private void teleportPlayer() throws CommandUsageException {
-    List<HomeRecord> homes = HomeRecord.findHomeRecordsByOwnerAndWorld(database, playerName, worldUUID);
-    if (!homes.isEmpty()) {
-      if (isLocationObstructed(homes.get(0).getLocation(server))) throw new CommandUsageException(this.getLocalisation().getMessage(this, "home-is-obstructed"));
-      cooldownTracker.put(playerName, System.currentTimeMillis() + cooldownTime);
-      this.server.getScheduler().scheduleSyncDelayedTask(this.plugin, new ScheduledTeleport(this.player, homes.get(0).getLocation(server), this.cooldownTracker, cooldownTime), this.warmupTicks);
-      this.player.sendMessage(this.getLocalisation().getMessage(this, "teleport-warmup", this.warmupTime));
-    } else {
-      throw new CommandUsageException(this.getLocalisation().getMessage(this, "no-home-set", playerName));
-    }
-  }
+	private final String warmupTime;
 
+	public TeleportCommand(final Hearthstone plugin, final long warmup, final long cooldown) {
+		super();
+		this.server = plugin.getServer();
+		this.plugin = plugin;
+		this.warmupTime = TimeFormatter.millisToLongDHMS(warmup);
+		this.warmupTicks = (warmup / 1000) * 20;
+		this.database = plugin.getDatabase();
+		this.cooldownTracker = plugin.getCooldownTracker();
+		this.cooldownTime = cooldown;
+	}
 
-  private String matchPlayerName(String playerName) {
-    List<Player> matches = this.server.matchPlayer(playerName);
-    if (matches.isEmpty()) {
-      return playerName;
-    } else {
-      return matches.get(0).getName();
-    }
-  }
+	public void execute(final List<String> arguments, final CommandSender sender) {
+		if (!(sender instanceof Player)) {
+			sender.sendMessage(this.getMessage("misc.error.not-available-to-console-command-sender"));
+			return;
+		}
+		this.player = this.server.getPlayerExact(sender.getName());
+		if (arguments.isEmpty()) {
+			this.playerName = this.player.getName();
+			this.worldUUID = this.player.getLocation().getWorld().getUID();
+		} else {
+			this.playerName = arguments.remove(0);
+			if (!arguments.isEmpty()) {
+				final World world = this.server.getWorld(arguments.remove(0));
+				if (world == null) {
+					sender.sendMessage(this.getMessage("misc.error.world-not-loaded"));
+					return;
+				} else {
+					this.worldUUID = world.getUID();
+				}
+			}
+		}
+		if (this.hasPermission(sender)) {
+			this.teleportPlayer();
+		} else {
+			sender.sendMessage(this.getMessage("misc.error.permission-denied"));
 
-  protected void registerPermissions() {
-    own = this.getPermissionManager().createPermission(this, "own", PermissionDefault.TRUE, this.getPermissions().get(0), true);
-    this.addPermission(own);
-    others = this.getPermissionManager().createPermission(this, "others", PermissionDefault.OP, this.getPermissions().get(0), true);
-    this.addPermission(others);
-    cooldown = this.getPermissionManager().createPermission(this, "cooldown", PermissionDefault.NOT_OP, this.getPermissions().get(0), false);
-    this.addPermission(cooldown);
-  }
-  
-  private UUID getWorldUUID(String worldName) throws CommandArgumentException {
-    World world = server.getWorld(worldName);
-    if (world != null) {
-      return world.getUID();
-    } else {
-      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "invalid-world"), this.getLocalisation().getMessage(this, "world-must-be-loaded"));
-    }
-  }
-  
-  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
-    this.player = (Player) sender;
-    if (arguments.length == 1) {
-      String playerName = matchPlayerName(arguments[0]);
-      this.playerName = playerName;
-      this.worldUUID = player.getLocation().getWorld().getUID();
-    } else if (arguments.length == 2) {
-      this.playerName = matchPlayerName(arguments[0]);
-      this.worldUUID = getWorldUUID(arguments[1]);
-    } else {
-      this.playerName = player.getName();
-      this.worldUUID = player.getLocation().getWorld().getUID();
-    }
-  }
+		}
+	}
 
-  public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] arguments) {
-    List<String> list = new ArrayList<String>();
-    Set<String> temp = new TreeSet<String>();
-    if (arguments.length <= 1) {
-      for (Player player : this.server.getOnlinePlayers()) {
-        temp.add(player.getName());
-      }
-      if (arguments[0].length() >= 3) {
-        temp.addAll(HomeRecord.findHomeRecordsWhenOwnerStartsWith(database, arguments[0]));
-      }
-    } else if (arguments.length == 2) {
-      for (World world : this.server.getWorlds()) {
-        temp.add(world.getName());
-      }
-    } 
-    list.addAll(temp);
-    return list;
-  }
+	public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] arguments) {
+		if (this.isAuthorized(sender)) {
+			this.execute(new LinkedList<String>(Arrays.asList(arguments)), sender);
+		} else {
+			sender.sendMessage(this.getMessage("misc.warning.permission-denied"));
+		}
+		return true;
+	}
+
+	public List<String> onTabComplete(final CommandSender sender, final Command command, final String label, final String[] arguments) {
+		return this.onTabComplete(Arrays.asList(arguments), sender);
+	}
+
+	private boolean hasPermission(final CommandSender sender) {
+		final boolean isSenderTargetingSelf = (this.playerName.equalsIgnoreCase(sender.getName())) ? true : false;
+		if (sender.hasPermission("hearthstone.teleport.own") && isSenderTargetingSelf) { return true; }
+		if (sender.hasPermission("hearthstone.teleport.others") && !isSenderTargetingSelf) { return true; }
+		return false;
+	}
+
+	private void teleportPlayer() {
+		final List<HomeRecord> homes = HomeRecord.findHomeRecordsByOwnerAndWorld(this.database, this.playerName, this.worldUUID);
+		if (!homes.isEmpty()) {
+			final Home location = new Home(homes.get(0).getLocation(this.server));
+			if (location.isObstructed()) {
+				this.player.sendMessage(this.getMessage("shared.error.location-obstructed"));
+			}
+			this.cooldownTracker.put(this.playerName, System.currentTimeMillis() + this.cooldownTime);
+			final ScheduledTeleport task = new ScheduledTeleport(this.player, location, this.cooldownTracker, this.cooldownTime);
+			if (!this.player.hasPermission("hearthstone.teleport.warmup")) {
+				this.server.getScheduler().scheduleSyncDelayedTask(this.plugin, task);
+			} else {
+				this.server.getScheduler().scheduleSyncDelayedTask(this.plugin, task, this.warmupTicks);
+				this.player.sendMessage(this.getMessage("teleportcommand.warming-up", this.warmupTime));
+			}
+		} else {
+			this.player.sendMessage(this.getMessage("teleportcommand.no-home-set", this.playerName));
+		}
+	}
 
 }
