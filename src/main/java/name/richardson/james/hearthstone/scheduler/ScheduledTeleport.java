@@ -64,7 +64,6 @@ public class ScheduledTeleport implements Runnable {
 	}
 
 	private boolean hasPlayerMoved() {
-		System.out.format("Distance: %s", String.valueOf(this.player.getLocation().distance(this.lastLocation)));
 		return this.player.getLocation().distance(this.lastLocation) >= 1;
 	}
 
