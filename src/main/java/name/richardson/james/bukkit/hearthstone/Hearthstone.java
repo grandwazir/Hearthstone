@@ -33,6 +33,7 @@ import name.richardson.james.bukkit.hearthstone.general.HomeCommand;
 import name.richardson.james.bukkit.hearthstone.general.SetCommand;
 import name.richardson.james.bukkit.hearthstone.persistence.HearthstoneConfiguration;
 import name.richardson.james.bukkit.hearthstone.persistence.HomeRecord;
+import name.richardson.james.bukkit.hearthstone.teleport.ScheduledTeleport;
 import name.richardson.james.bukkit.hearthstone.teleport.TeleportCommand;
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
@@ -109,6 +110,8 @@ public class Hearthstone extends AbstractPlugin {
 
 	protected void registerCommands() {
 		Home.setGlobalRegionManager(this.getGlobalRegionManager());
+		ScheduledTeleport.setCooldownTime(this.configuration.getCooldown());
+		ScheduledTeleport.setWarmupTime(this.configuration.getWarmUp());
 		final CommandManager commandManager = new CommandManager("hs");
 		final SetCommand setCommand = new SetCommand(this);
 		commandManager.addCommand(setCommand);
