@@ -89,6 +89,8 @@ public class TeleportCommand extends AbstractCommand implements TabExecutor {
 				} else {
 					this.worldUUID = world.getUID();
 				}
+			} else {
+				this.worldUUID = this.player.getWorld().getUID();
 			}
 		}
 		if (this.hasPermission(sender)) {

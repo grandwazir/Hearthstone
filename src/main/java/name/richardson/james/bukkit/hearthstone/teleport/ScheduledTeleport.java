@@ -121,7 +121,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 		if (!COOLDOWN_TRACKER.containsKey(this.player.getName())) { return false; }
 		final long expires = System.currentTimeMillis() + COOLDOWN_TRACKER.get(this.player.getName());
 		if (expires > System.currentTimeMillis()) {
-			this.player.sendMessage(this.getMessage("shared.error.teleport-cooldown", ScheduledTeleport.cooldownTime));
+			this.player.sendMessage(this.getMessage("error.teleport-cooldown", ScheduledTeleport.cooldownTime));
 			return true;
 		} else {
 			return false;
@@ -130,7 +130,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean hasPlayerMoved() {
 		if (this.player.getLocation().distance(this.lastLocation) >= MOVEMENT_THRESHOLD) {
-			this.player.sendMessage(this.getMessage("shared.error.player-moved-too-far"));
+			this.player.sendMessage(this.getMessage("error.player-moved-too-far"));
 			return true;
 		} else {
 			return false;
@@ -139,7 +139,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean hasPlayerTakenDamage() {
 		if (this.player.getHealth() != this.health) {
-			this.player.sendMessage(this.getMessage("shared.error.player-taken-damage"));
+			this.player.sendMessage(this.getMessage("error.player-taken-damage"));
 			return true;
 		} else {
 			return false;
@@ -148,7 +148,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean isLocationObstructed() {
 		if (this.home.isObstructed()) {
-			this.player.sendMessage(this.getMessage("shared.error.location-obstructed"));
+			this.player.sendMessage(this.getMessage("error.location-obstructed"));
 			return true;
 		} else {
 			return false;
@@ -157,7 +157,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private void schedule() {
 		if (this.player.hasPermission("hearthstone.teleport.warmup")) {
-			this.player.sendMessage(this.getMessage("shared.notice.teleport-warmup", ScheduledTeleport.warmupTime));
+			this.player.sendMessage(this.getMessage("notice.teleport-warmup", ScheduledTeleport.warmupTime));
 			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(ScheduledTeleport.getPlugin(), this, ScheduledTeleport.warmup);
 		} else {
 			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(plugin, this);
