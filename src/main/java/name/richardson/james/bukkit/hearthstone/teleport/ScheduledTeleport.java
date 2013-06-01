@@ -136,8 +136,6 @@ public class ScheduledTeleport implements Runnable, Localised {
 	}
 
 	private boolean hasPlayerTakenDamage() {
-		System.out.append(String.valueOf(this.player.getHealth()));
-		System.out.append(String.valueOf(this.health));
 		if (this.player.getHealth() < this.health) {
 			this.player.sendMessage(this.getMessage("error.player-taken-damage"));
 			return true;
