@@ -1,234 +1,148 @@
-
 <!DOCTYPE html>
+
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Getting started</title>
-    <meta name="description" content="">
-    <meta name="author" content="James Richardson">
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Linux https://github.com/w3c/tidy-html5/tree/c63cc39">
+  <meta charset="utf-8">
 
-    <!-- Enable responsive viewport -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting started</title>
+  <meta name="description" content="">
+  <meta name="author" content="James Richardson"><!-- Enable responsive viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- Import bootstrap .js -->
 
-    <!-- Import bootstrap .js -->
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="http://grandwazir.github.com/Hearthstone/assets/themes/twitter/bootstrap/js/bootstrap.js"></script>
-
-    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-    <!--[if lt IE 9]>
+  <script src="http://code.jquery.com/jquery-1.9.1.min.js">
+</script>
+  <script type="text/javascript" src="/assets/themes/twitter/bootstrap/js/bootstrap.js">
+</script><!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
-    <!-- Le styles -->
-    <link href="http://grandwazir.github.com/Hearthstone/assets/themes/twitter/bootstrap/css/bootstrap.2.2.2.min.css" rel="stylesheet">
-    <link href="http://grandwazir.github.com/Hearthstone/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
-
-    <!-- Le fav and touch icons -->
+  <!-- Le styles -->
+  <link href="/assets/themes/twitter/bootstrap/css/bootstrap.2.2.2.min.css" rel="stylesheet">
+  <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all"><!-- Le fav and touch icons -->
   <!-- Update these with your own images
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
   -->
+  <!-- atom & rss feed -->
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+  <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+</head>
 
-    <!-- atom & rss feed -->
-    <link href="http://grandwazir.github.com/Hearthstone/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
-    <link href="http://grandwazir.github.com/Hearthstone/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+<body data-spy="scroll" data-target="#scrollspy" class="extra-padding">
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container-narrow">
+        <a class="brand" href="/">PLUGIN NAME</a>
 
-  </head>
+        <ul class="nav">
+          <li>
+            <a href="/download.html">Download</a>
+          </li>
 
-  <body data-spy="scroll" data-target="#scrollspy" class="extra-padding">
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-narrow">
-          <a class="brand" href="http://grandwazir.github.com/Hearthstone">Hearthstone</a>
+          <li>
+            <a href="/features.html">Features</a>
+          </li>
+
+          <li class="active">
+            <a href="/getting_started.html" class="active">Getting started</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div><!-- Add a secondary bar if necessary -->
+
+  <div id="scrollspy" class="navbar navbar-inverse navbar-fixed-top navbar-secondary">
+    <div class="navbar-inner">
+      <div class="container-narrow">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"></a>
+
+        <div class="nav-collapse">
           <ul class="nav">
-            
-            
-            
+            <li>
+              <a href="#setting_homes">Setting homes</a>
+            </li>
 
+            <li>
+              <a href="#going_home">Going home</a>
+            </li>
 
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-      	
-      	<li class="active"><a href="http://grandwazir.github.com/Hearthstone/getting_started.html" class="active">Getting started</a></li>
-      	
-      
-    
-  
-    
-      
-      	
-      	<li><a href="http://grandwazir.github.com/Hearthstone/download.html">Download</a></li>
-      	
-      
-    
-  
-    
-      
-    
-  
-    
-      
-      	
-      	<li><a href="http://grandwazir.github.com/Hearthstone/features.html">Features</a></li>
-      	
-      
-    
-  
-
-
-
+            <li>
+              <a href="#permissions">Permissions</a>
+            </li>
           </ul>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Add a secondary bar if necessary -->
-    
-    <div id="scrollspy" class="navbar navbar-inverse navbar-fixed-top navbar-secondary">
-      <div class="navbar-inner">
-        <div class="container-narrow">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <div class="nav-collapse">       
-            <ul class="nav">
-              
-                
-                  <li><a href="#setting_homes">Setting homes</a></li>
-                
-              
-                
-                  <li><a href="#going_home">Going home</a></li>
-                
-              
-                
-                  <li><a href="#permissions">Permissions</a></li>
-                
-              
-            </ul>
-          </div>
-        </div>
+  <div class="container-narrow scroll-adjust">
+    <div class="content">
+      <div class="page-header">
+        <h1>Getting started</h1>
       </div>
-    </div>
-    
 
-    <div class="container-narrow scroll-adjust">
+      <div class="row-fluid">
+        <div class="span12">
+          <p class='lead'>Getting started with Hearthstone couldn't be easier. Just download and drag it into your plugins folder and away you go. Still stuck? Read on.</p>
 
-      <div class="content">
-        
-<div class="page-header">
-  <h1>Getting started </h1>
-</div>
+          <h2 id='setting_homes'>Setting homes</h2>
 
-<div class="row-fluid">
-  <div class="span12">
-    <p class='lead'>Getting started with Hearthstone couldn't be easier. Just download and drag it into your plugins folder and away you go. Still stuck? Read on.</p>
-<h2 id='setting_homes'>Setting homes</h2>
+          <p>Players can set a home anywhere in the game world with two exceptions. Firstly players may not set homes in areas where they are unable to build. Secondly they can not use an obstructed location. Hearthstone considers any area which is not made out of air and does not have enough space for the player to teleport to as obstructed.</p>
 
-<p>Players can set a home anywhere in the game world with two exceptions. Firstly players may not set homes in areas where they are unable to build. Secondly they can not use an obstructed location. Hearthstone considers any area which is not made out of air and does not have enough space for the player to teleport to as obstructed.</p>
+          <p>You can set your own home by typing either <code>/home set</code> or <code>/hs set</code>; both do exactly the same thing. There is no cooldown when setting a new home and you can do it as often as you like.</p>
 
-<p>You can set your own home by typing either <code>/home set</code> or <code>/hs set</code>; both do exactly the same thing. There is no cooldown when setting a new home and you can do it as often as you like.</p>
+          <p>Players are allowed to set one home per world. If they set another one when they already have an existing home, it will forget about the other one.</p>
 
-<p>Players are allowed to set one home per world. If they set another one when they already have an existing home, it will forget about the other one.</p>
+          <h3 id='setting_other_players_homes'>Setting other players homes</h3>
 
-<h3 id='setting_other_players_homes'>Setting other players homes</h3>
+          <p>You can also set a home for someone else using the same command. This works exactly the same way but you need to supply the name of the player whos home you want to set. For example <code>/hs set grandwazir</code> would set my home to your current location.</p>
 
-<p>You can also set a home for someone else using the same command. This works exactly the same way but you need to supply the name of the player whos home you want to set. For example <code>/hs set grandwazir</code> would set my home to your current location.</p>
+          <h3 id='restricting_home_locations'>Restricting home locations</h3>
 
-<h3 id='restricting_home_locations'>Restricting home locations</h3>
+          <p>You can also prevent players from setting a world in a location where they are unable to build. This is helpful for example in adventure maps where teleportation could cause you problems.</p>
 
-<p>You can also prevent players from setting a world in a location where they are unable to build. This is helpful for example in adventure maps where teleportation could cause you problems.</p>
+          <p>All you need to do is download WorldGuard and region the areas of your world. Hearthstone will check with WorldGuard to see if a player is allowed to build in an area. It is that simple!</p>
 
-<p>All you need to do is download WorldGuard and region the areas of your world. Hearthstone will check with WorldGuard to see if a player is allowed to build in an area. It is that simple!</p>
+          <h2 id='going_home'>Going home</h2>
 
-<h2 id='going_home'>Going home</h2>
+          <p>You can teleport home at any time by typing <code>/home</code> providing it is not cooling down. This will instantly teleport to your home in your current world. Unless I have permission I would not be able to teleport again until my cooldown has expired.</p>
 
-<p>You can teleport home at any time by typing <code>/home</code> providing it is not cooling down. This will instantly teleport to your home in your current world. Unless I have permission I would not be able to teleport again until my cooldown has expired.</p>
+          <p>You can also teleport to homes located in other worlds by typing <code>/hs teleport grandwazir world_nether</code>. This would teleport me to my secret nether fortress.</p>
 
-<p>You can also teleport to homes located in other worlds by typing <code>/hs teleport grandwazir world_nether</code>. This would teleport me to my secret nether fortress.</p>
+          <h3 id='teleporting_to_other_players_homes'>Teleporting to other players homes</h3>
 
-<h3 id='teleporting_to_other_players_homes'>Teleporting to other players homes</h3>
+          <p>Additionally you can teleport to a home belonging to any player in any world. This command still enforces a cooldown, so it you may want to make sure your moderators are except from the cooldown when you give them permission to use this command. For example I am going to teleport to Fuzic’s house in the current world by typing <code>/hs teleport fuzic</code>.</p>
 
-<p>Additionally you can teleport to a home belonging to any player in any world. This command still enforces a cooldown, so it you may want to make sure your moderators are except from the cooldown when you give them permission to use this command. For example I am going to teleport to Fuzic&#8217;s house in the current world by typing <code>/hs teleport fuzic</code>.</p>
+          <h3 id='cooldown_between_teleports'>Cooldown between teleports</h3>
 
-<h3 id='cooldown_between_teleports'>Cooldown between teleports</h3>
+          <p>It is possible for administrators to force players to obey a cooldown between teleports. This is useful to prevent players repeatedly setting and teleporting home as a travel, safety or griefing exploit. You set the amount of time you wish players to wait by changing the value of cooldown in the config.yml. By default it looks like this:</p>
+          <pre>
+<code>cooldown: 15m</code>
+</pre>
 
-<p>It is possible for administrators to force players to obey a cooldown between teleports. This is useful to prevent players repeatedly setting and teleporting home as a travel, safety or griefing exploit. You set the amount of time you wish players to wait by changing the value of cooldown in the config.yml. By default it looks like this:</p>
+          <h2 id='permissions'>Permissions</h2>
 
-<pre><code>cooldown: 15m</code></pre>
-
-<h2 id='permissions'>Permissions</h2>
-
-<p>Each command is assigned its own permission node and all follow the same style. The full list of available permissions, and their defaults, is below. Additionally there is the <code>hearthstone.teleport.cooldown</code> node. Players who have this permission will not be able to teleport home unless the cooldown time has expired.</p>
-
-<pre><code>hearthstone.set (op)
+          <p>Each command is assigned its own permission node and all follow the same style. The full list of available permissions, and their defaults, is below. Additionally there is the <code>hearthstone.teleport.cooldown</code> node. Players who have this permission will not be able to teleport home unless the cooldown time has expired.</p>
+          <pre>
+<code>hearthstone.set (op)
 hearthstone.set.own (true)
 hearthstone.set.others (op)
 hearthstone.teleport (op)
 hearthstone.teleport.own (true)
 hearthstone.teleport.others (op)
-hearthstone.teleport.cooldown (!op)</code></pre>
-  </div>
-</div>
-
-
+hearthstone.teleport.cooldown (!op)</code>
+</pre>
+        </div>
       </div>
-      <hr>
-      <footer>
-        <p>&copy; 2013 James Richardson
-          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
-          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
-        </p>
-      </footer>
-
     </div>
+    <hr>
 
-    
-
-
-  <script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-123-12']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
-
-
-
-  </body>
+    <footer>
+      <p class="text-center"><small>© 2013 James Richardson with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a> and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a></small></p>
+    </footer>
+  </div>
+</body>
 </html>
-

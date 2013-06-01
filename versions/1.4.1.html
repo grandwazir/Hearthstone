@@ -5,7 +5,7 @@
   <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Linux https://github.com/w3c/tidy-html5/tree/c63cc39">
   <meta charset="utf-8">
 
-  <title>1.3.2</title>
+  <title>1.4.1</title>
   <meta name="description" content="">
   <meta name="author" content="James Richardson"><!-- Enable responsive viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- Import bootstrap .js -->
@@ -57,35 +57,31 @@
   <div class="container-narrow scroll-adjust">
     <div class="content">
       <div class="page-header">
-        <h1>1.3.2 <small>Released on 24 March 2013</small></h1>
+        <h1>1.4.1 <small>Released on 01 June 2013</small></h1>
       </div>
 
       <ul class="inline">
         <li>
-          <a href="http://repository.james.richardson.name/releases/name/richardson/james/bukkit/hearthstone/1.3.2/hearthstone-1.3.2.jar"><button class="btn btn-large btn-primary" type="button">Download</button></a>
+          <a href="http://repository.james.richardson.name/releases/name/richardson/james/bukkit/hearthstone/1.4.1/hearthstone-1.4.1.jar"><button class="btn btn-large btn-primary" type="button">Download</button></a>
         </li>
 
         <li>
-          <a href="https://github.com/grandwazir/Hearthstone/tree/v1.3.2"><button class="btn btn-large" type="button">Source</button></a>
+          <a href="https://github.com/grandwazir/Hearthstone/tree/v1.4.1"><button class="btn btn-large" type="button">Source</button></a>
         </li>
       </ul>
 
       <div class="row-fluid">
         <div class="span12">
-          <div class='alert alert-warning'>
-            Permissions have changed. You may need to update your configuration.
-          </div>
-
-          <p>Wildcard permissions have been removed in favor of the new style permission nodes introduced with SuperPerms. This means for example where <code>hearthstone.teleport.*</code> would give you access to everything underneath that node, you now need to just grant hearthstone.teleport.</p>
-
-          <p>If you just want someone to be able to teleport to their own home you would grant hearthstone.teleport.own. It is not necessary to also grant hearthstone.teleport.</p>
-
           <h2 id='improvements'>Improvements</h2>
 
           <ul>
-            <li>Permission changes (see above)</li>
+            <li>Can no longer set homes in places where players can not build.</li>
 
-            <li>Tab completion of all commands.</li>
+            <li>Cooldown now actually expires correctly in all cases.</li>
+
+            <li>Damage check now accurate.</li>
+
+            <li>Tab completion for teleport and set commands.</li>
           </ul>
         </div>
       </div>
