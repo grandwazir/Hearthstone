@@ -50,7 +50,6 @@ public class ScheduledTeleport implements Runnable, Localised {
 	private static final ResourceBundle LOCALISATION = ResourceBundle.getBundle(ResourceBundles.MESSAGES.getBundleName());
 
 	private static long cooldown = 0;
-	private static String cooldownTime;
 	private static Plugin plugin = null;
 	private static long warmup = 0;
 	private static String warmupTime;
@@ -64,7 +63,6 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	public static void setCooldownTime(final long milliseconds) {
 		ScheduledTeleport.cooldown = milliseconds;
-		ScheduledTeleport.cooldownTime = TimeFormatter.millisToLongDHMS(cooldown);
 	}
 
 	public static void setWarmupTime(final long milliseconds) {
@@ -119,9 +117,9 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean hasCooldown() {
 		if (!COOLDOWN_TRACKER.containsKey(this.player.getName())) { return false; }
-		final long expires = System.currentTimeMillis() + COOLDOWN_TRACKER.get(this.player.getName());
-		if (expires > System.currentTimeMillis()) {
-			this.player.sendMessage(this.getMessage("error.teleport-cooldown", ScheduledTeleport.cooldownTime));
+		final long timeRemaining = COOLDOWN_TRACKER.get(this.player.getName()) - System.currentTimeMillis();
+		if (timeRemaining > 0) {
+			this.player.sendMessage(this.getMessage("error.teleport-cooldown", TimeFormatter.millisToLongDHMS(timeRemaining)));
 			return true;
 		} else {
 			return false;
@@ -138,7 +136,9 @@ public class ScheduledTeleport implements Runnable, Localised {
 	}
 
 	private boolean hasPlayerTakenDamage() {
-		if (this.player.getHealth() != this.health) {
+		System.out.append(String.valueOf(this.player.getHealth()));
+		System.out.append(String.valueOf(this.health));
+		if (this.player.getHealth() < this.health) {
 			this.player.sendMessage(this.getMessage("error.player-taken-damage"));
 			return true;
 		} else {

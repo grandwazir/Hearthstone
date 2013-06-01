@@ -1,5 +1,6 @@
 Changelog for Hearthstone (v1.4.1-SNAPSHOT)
 
+2013-05-30 18:28:25 +0100    remove old localisation not needed (James Richardson)
 2013-05-30 18:13:52 +0100    use ticks instead of milliseconds with the scheduler (James Richardson)
 2013-05-30 18:12:06 +0100    set static variables on ScheduledTeleport (James Richardson)
 2013-05-30 18:10:48 +0100    remove prefix from old keys (James Richardson)
