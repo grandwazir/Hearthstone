@@ -39,6 +39,8 @@ import name.richardson.james.bukkit.utilities.logging.PluginLoggerFactory;
 import name.richardson.james.bukkit.utilities.persistence.database.DatabaseLoader;
 import name.richardson.james.bukkit.utilities.persistence.database.DatabaseLoaderFactory;
 import name.richardson.james.bukkit.utilities.persistence.database.SimpleDatabaseConfiguration;
+import name.richardson.james.bukkit.utilities.updater.BukkitDevPluginUpdater;
+import name.richardson.james.bukkit.utilities.updater.PluginUpdater;
 
 import name.richardson.james.bukkit.hearthstone.general.SetCommand;
 import name.richardson.james.bukkit.hearthstone.persistence.HearthstoneConfiguration;
@@ -48,6 +50,7 @@ import name.richardson.james.bukkit.hearthstone.teleport.TeleportCommand;
 public class Hearthstone extends JavaPlugin {
 
 	private static final String DATABASE_CONFIG_NAME = "database.yml";
+	private static final int PROJECT_ID = 31246;
 
 	/* Configuration for the plugin */
 	private HearthstoneConfiguration configuration;
@@ -136,6 +139,14 @@ public class Hearthstone extends JavaPlugin {
 		CommandInvoker invoker = new FallthroughCommandInvoker(helpCommand);
 		invoker.addCommands(commandSet);
 		this.getCommand("home").setExecutor(invoker);
+	}
+
+	private void updatePlugin() {
+		if (!configuration.getAutomaticUpdaterState().equals(PluginUpdater.State.OFF)) {
+			PluginUpdater updater = new BukkitDevPluginUpdater(this.getDescription(), configuration.getAutomaticUpdaterBranch(), configuration.getAutomaticUpdaterState(), PROJECT_ID, this.getServer().getUpdateFolderFile(), this.getServer().getVersion());
+			this.getServer().getScheduler().runTaskAsynchronously(this, updater);
+			new name.richardson.james.bukkit.utilities.updater.PlayerNotifier(this, this.getServer().getPluginManager(), updater);
+		}
 	}
 
 	public EbeanServer getDatabase() {
