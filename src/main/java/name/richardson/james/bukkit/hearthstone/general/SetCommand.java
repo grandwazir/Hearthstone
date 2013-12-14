@@ -18,92 +18,105 @@
  ******************************************************************************/
 package name.richardson.james.bukkit.hearthstone.general;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Server;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.permissions.Permissible;
 
 import com.avaje.ebean.EbeanServer;
 
-import name.richardson.james.bukkit.hearthstone.Hearthstone;
+import name.richardson.james.bukkit.utilities.command.AbstractCommand;
+import name.richardson.james.bukkit.utilities.command.context.CommandContext;
+import name.richardson.james.bukkit.utilities.formatters.ColourFormatter;
+import name.richardson.james.bukkit.utilities.formatters.DefaultColourFormatter;
+import name.richardson.james.bukkit.utilities.formatters.PreciseDurationTimeFormatter;
+import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
+import name.richardson.james.bukkit.utilities.localisation.Localisation;
+import name.richardson.james.bukkit.utilities.localisation.ResourceBundleByClassLocalisation;
+
 import name.richardson.james.bukkit.hearthstone.Home;
 import name.richardson.james.bukkit.hearthstone.persistence.HomeRecord;
-import name.richardson.james.bukkit.utilities.command.AbstractCommand;
-import name.richardson.james.bukkit.utilities.command.CommandMatchers;
-import name.richardson.james.bukkit.utilities.command.CommandPermissions;
-import name.richardson.james.bukkit.utilities.matchers.OfflinePlayerMatcher;
-import name.richardson.james.bukkit.utilities.matchers.WorldMatcher;
 
-@CommandMatchers(matchers = { OfflinePlayerMatcher.class, WorldMatcher.class })
-@CommandPermissions(permissions = { "hearthstone.set", "hearthstone.set.own", "hearthstone.set.others" })
-public class SetCommand extends AbstractCommand implements TabExecutor {
+public class SetCommand extends AbstractCommand {
+
+	public static final String PERMISSION_ALL = "hearthstone.set";
+	public static final String PERMISSION_OWN = "hearthstone.set.own";
+	public static final String PERMISSION_OTHERS = "hearthstone.set.others";
+
+	private static final String PLAYER_COMMAND_SENDER_REQUIRED_KEY = "player-command-sender-required";
+	private static final String HOME_SET_KEY = "home-set";
+	private static final String PERMISSION_DENIED_KEY = "permission-denied";
+	private static final String LOCATION_OBSTRUCTED_KEY = "location-obstructed";
+	private static final String LOCATION_INDESTRUCTIBLE_KEY = "location-indestructible";
+
+	private final Localisation localisation = new ResourceBundleByClassLocalisation(SetCommand.class);
+	private final ColourFormatter colourFormatter = new DefaultColourFormatter();
+	private final TimeFormatter timeFormatter = new PreciseDurationTimeFormatter();
 
 	private final Server server;
-
 	private final EbeanServer database;
 
-	/** The name of the players home we are setting */
 	private String playerName;
-
-	/** The player who is setting the home */
 	private Player player;
 
-	public SetCommand(final Hearthstone plugin) {
-		super();
-		this.server = plugin.getServer();
-		this.database = plugin.getDatabase();
-		Bukkit.getPluginManager().getPermission("hearthstone.set.own").setDefault(PermissionDefault.TRUE);
+	public SetCommand(Server server, EbeanServer database) {
+		this.server = server;
+		this.database = database;
 	}
 
-	public void execute(final List<String> arguments, final CommandSender sender) {
-		if (!(sender instanceof Player)) {
-			sender.sendMessage(this.getMessage("error.player-command-sender-required"));
+	/**
+	 * Execute a command using the provided {@link name.richardson.james.bukkit.utilities.command.context.CommandContext}.
+	 *
+	 * @param commandContext the command context to execute this command within.
+	 * @since 6.0.0
+	 */
+	@Override
+	public void execute(CommandContext commandContext) {
+		if (!(commandContext.getCommandSender() instanceof Player)) {
+			commandContext.getCommandSender().sendMessage(colourFormatter.format(localisation.getMessage(PLAYER_COMMAND_SENDER_REQUIRED_KEY), ColourFormatter.FormatStyle.ERROR));
 			return;
 		}
-		this.player = this.server.getPlayerExact(sender.getName());
-		if (arguments.isEmpty()) {
-			this.playerName = sender.getName();
+		this.player = this.server.getPlayerExact(commandContext.getCommandSender().getName());
+		if (commandContext.size() == 0) {
+			this.playerName = commandContext.getCommandSender().getName();
 		} else {
-			this.playerName = arguments.remove(0);
+			this.playerName = commandContext.getString(0);
 		}
-		if (this.hasPermission(sender) && this.createHome()) {
+		if (this.hasPermission(commandContext.getCommandSender()) && this.createHome()) {
 			this.createHome();
-			sender.sendMessage(this.getMessage("notice.home-set", this.playerName));
+			commandContext.getCommandSender().sendMessage(colourFormatter.format(localisation.getMessage(HOME_SET_KEY), ColourFormatter.FormatStyle.INFO, this.playerName));
 		} else {
-			sender.sendMessage(this.getMessage("warning.permission-denied"));
+			commandContext.getCommandSender().sendMessage(colourFormatter.format(localisation.getMessage(PERMISSION_DENIED_KEY), ColourFormatter.FormatStyle.ERROR));
 		}
 	}
 
-	public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] arguments) {
-		if (this.isAuthorized(sender)) {
-			this.execute(new LinkedList<String>(Arrays.asList(arguments)), sender);
-		} else {
-			sender.sendMessage(this.getMessage("warning.permission-denied"));
-		}
-		return true;
-	}
-
-	public List<String> onTabComplete(final CommandSender sender, final Command command, final String label, final String[] arguments) {
-		return this.onTabComplete(Arrays.asList(arguments), sender);
+	/**
+	 * Returns {@code true} if the user is authorised to use this command.
+	 * <p/>
+	 * Authorisation does not guarantee that the user may use all the features associated with a command.
+	 *
+	 * @param permissible the permissible requesting authorisation
+	 * @return {@code true} if the user is authorised; {@code false} otherwise
+	 * @since 6.0.0
+	 */
+	@Override
+	public boolean isAuthorised(Permissible permissible) {
+		if (permissible.hasPermission(PERMISSION_ALL)) return true;
+		if (permissible.hasPermission(PERMISSION_OTHERS)) return true;
+		if (permissible.hasPermission(PERMISSION_OWN)) return true;
+		return false;
 	}
 
 	private boolean createHome() {
 		final Home home = new Home(this.player.getLocation());
 		// check if location is obstructed
 		if (home.isObstructed()) {
-			this.player.sendMessage(this.getMessage("error.location-obstructed"));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(LOCATION_OBSTRUCTED_KEY), ColourFormatter.FormatStyle.ERROR));
 			return false;
 		}
 		// check if the location is buildable
 		if (!home.isBuildable(this.player)) {
-			this.player.sendMessage(this.getMessage("error.location-indestructible"));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(LOCATION_INDESTRUCTIBLE_KEY), ColourFormatter.FormatStyle.ERROR));
 			return false;
 		}
 		// delete any existing homes
@@ -124,8 +137,8 @@ public class SetCommand extends AbstractCommand implements TabExecutor {
 
 	private boolean hasPermission(final CommandSender sender) {
 		final boolean isSenderTargetingSelf = (this.playerName.equalsIgnoreCase(sender.getName())) ? true : false;
-		if (sender.hasPermission("hearthstone.set.own") && isSenderTargetingSelf) { return true; }
-		if (sender.hasPermission("hearthstone.set.others") && !isSenderTargetingSelf) { return true; }
+		if (sender.hasPermission(PERMISSION_OWN) && isSenderTargetingSelf) { return true; }
+		if (sender.hasPermission(PERMISSION_OTHERS) && !isSenderTargetingSelf) { return true; }
 		return false;
 	}
 

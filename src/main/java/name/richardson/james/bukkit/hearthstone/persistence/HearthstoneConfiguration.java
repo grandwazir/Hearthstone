@@ -22,21 +22,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import name.richardson.james.bukkit.utilities.configuration.SimplePluginConfiguration;
+import name.richardson.james.bukkit.utilities.formatters.ApproximateTimeFormatter;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
+import name.richardson.james.bukkit.utilities.persistence.configuration.SimplePluginConfiguration;
 
 public class HearthstoneConfiguration extends SimplePluginConfiguration {
+
+	private TimeFormatter timeFormatter = new ApproximateTimeFormatter();
 
 	public HearthstoneConfiguration(final File file, final InputStream defaults) throws IOException {
 		super(file, defaults);
 	}
 
 	public long getCooldown() {
-		return TimeFormatter.parseTime(this.getConfiguration().getString("cooldown"));
+		return timeFormatter.getDurationInMilliseconds(this.getConfiguration().getString("cooldown"));
 	}
 
 	public long getWarmUp() {
-		return TimeFormatter.parseTime(this.getConfiguration().getString("warmup"));
+		return timeFormatter.getDurationInMilliseconds(this.getConfiguration().getString("warmup"));
 	}
 
 }

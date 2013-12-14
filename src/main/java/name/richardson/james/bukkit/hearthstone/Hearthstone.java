@@ -21,39 +21,44 @@ package name.richardson.james.bukkit.hearthstone;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Logger;
 
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.avaje.ebean.EbeanServer;
+import com.avaje.ebean.config.ServerConfig;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 
-import name.richardson.james.bukkit.hearthstone.general.HomeCommand;
+import name.richardson.james.bukkit.utilities.command.Command;
+import name.richardson.james.bukkit.utilities.command.HelpCommand;
+import name.richardson.james.bukkit.utilities.command.invoker.CommandInvoker;
+import name.richardson.james.bukkit.utilities.command.invoker.FallthroughCommandInvoker;
+import name.richardson.james.bukkit.utilities.logging.PluginLoggerFactory;
+import name.richardson.james.bukkit.utilities.persistence.database.DatabaseLoader;
+import name.richardson.james.bukkit.utilities.persistence.database.DatabaseLoaderFactory;
+import name.richardson.james.bukkit.utilities.persistence.database.SimpleDatabaseConfiguration;
+
 import name.richardson.james.bukkit.hearthstone.general.SetCommand;
 import name.richardson.james.bukkit.hearthstone.persistence.HearthstoneConfiguration;
 import name.richardson.james.bukkit.hearthstone.persistence.HomeRecord;
-import name.richardson.james.bukkit.hearthstone.teleport.ScheduledTeleport;
 import name.richardson.james.bukkit.hearthstone.teleport.TeleportCommand;
-import name.richardson.james.bukkit.utilities.command.CommandManager;
-import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
-import name.richardson.james.bukkit.utilities.plugin.PluginPermissions;
 
-@PluginPermissions(permissions = { "hearthstone" })
-public class Hearthstone extends AbstractPlugin {
+public class Hearthstone extends JavaPlugin {
+
+	private static final String DATABASE_CONFIG_NAME = "database.yml";
 
 	/* Configuration for the plugin */
 	private HearthstoneConfiguration configuration;
 
 	/* Cooldown tracker for the plugin */
 	private final Map<String, Long> cooldown = new HashMap<String, Long>();
+	private EbeanServer database;
+	private Logger logger = PluginLoggerFactory.getLogger(Hearthstone.class);
 
 	/* Reference to the WorldGuard plugin if loaded */
 	private WorldGuardPlugin worldGuard;
-
-	public String getArtifactID() {
-		return "hearthstone";
-	}
 
 	public Map<String, Long> getCooldownTracker() {
 		return this.cooldown;
@@ -83,14 +88,28 @@ public class Hearthstone extends AbstractPlugin {
 		try {
 			this.loadConfiguration();
 			this.loadDatabase();
-			this.setPermissions();
 			this.initaliseWorldGuard();
 			this.registerCommands();
-			this.setupMetrics();
-			this.updatePlugin();
+			//TODO this.setupMetrics();
+			//TODO this.updatePlugin();
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void loadDatabase()
+	throws IOException {
+		ServerConfig serverConfig = new ServerConfig();
+		getServer().configureDbConfig(serverConfig);
+		List<Class<?>> classes = new ArrayList<Class<?>>();
+		classes.add(HomeRecord.class);
+		serverConfig.setClasses(classes);
+		final File file = new File(this.getDataFolder().getPath() + File.separatorChar + DATABASE_CONFIG_NAME);
+		final InputStream defaults = this.getResource(DATABASE_CONFIG_NAME);
+		final SimpleDatabaseConfiguration configuration = new SimpleDatabaseConfiguration(file, defaults, this.getName(), serverConfig);
+		final DatabaseLoader loader = DatabaseLoaderFactory.getDatabaseLoader(configuration);
+		loader.initalise();
+		this.database = loader.getEbeanServer();
 	}
 
 	/*
@@ -100,24 +119,27 @@ public class Hearthstone extends AbstractPlugin {
 	 * name.richardson.james.bukkit.utilities.plugin.SkeletonPlugin#loadConfiguration
 	 * ()
 	 */
-	@Override
 	protected void loadConfiguration() throws IOException {
-		super.loadConfiguration();
 		final File file = new File(this.getDataFolder().getAbsolutePath() + File.separatorChar + "config.yml");
 		final InputStream defaults = this.getResource("config.yml");
 		this.configuration = new HearthstoneConfiguration(file, defaults);
+		this.logger.setLevel(configuration.getLogLevel());
 	}
 
 	protected void registerCommands() {
-		Home.setGlobalRegionManager(this.getGlobalRegionManager());
-		ScheduledTeleport.setCooldownTime(this.configuration.getCooldown());
-		ScheduledTeleport.setWarmupTime(this.configuration.getWarmUp());
-		final CommandManager commandManager = new CommandManager("hs");
-		final SetCommand setCommand = new SetCommand(this);
-		commandManager.addCommand(setCommand);
-		final TeleportCommand teleportCommand = new TeleportCommand(this, this.configuration.getWarmUp(), this.configuration.getCooldown());
-		commandManager.addCommand(teleportCommand);
-		this.getCommand("home").setExecutor(new HomeCommand(this, teleportCommand, setCommand));
+		Set<Command> commandSet = new HashSet<Command>();
+		// create the commands
+		commandSet.add(new SetCommand(this.getServer(), this.getDatabase()));
+		commandSet.add(new TeleportCommand(this.getServer(), this.getDatabase(), this.configuration.getWarmUp(), this.configuration.getCooldown()));
+		// create the invokers
+		HelpCommand helpCommand = new HelpCommand("home", commandSet);
+		CommandInvoker invoker = new FallthroughCommandInvoker(helpCommand);
+		invoker.addCommands(commandSet);
+		this.getCommand("home").setExecutor(invoker);
+	}
+
+	public EbeanServer getDatabase() {
+		return this.database;
 	}
 
 	private void initaliseWorldGuard() {

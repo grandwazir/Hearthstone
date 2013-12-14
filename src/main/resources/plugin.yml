@@ -4,9 +4,38 @@ version: ${project.version}
 author: James Richardson (grandwazir)
 website: https://github.com/grandwazir/${project.name} 
 main: name.richardson.james.bukkit.hearthstone.Hearthstone
-database: true
 commands:
   home:
     description: Used as an alias for hs teleport
-  hs:
-    description: The main root command for ${project.name}
+permissions:
+  hearthstone:
+    description: Allows access to everything in the plugin.
+    children:
+      hearthstone.set: true
+      hearthstone.teleport: true
+  hearthstone.teleport:
+    description: Allow a player to teleport to any home
+    children:
+      hearthstone.teleport.own: true
+      hearthstone.teleport.others: true
+  hearthstone.teleport.own:
+    description: Allow a player to teleport to their own home
+    default: true
+  hearthstone.teleport.others:
+    description: Allow a player to teleport to the homes of others.
+  hearthstone.teleport.cooldown:
+    description: Require a player to wait between successful teleports.
+    default: true
+  hearthstone.teleport.warmup:
+    description: Require a player to wait before a teleport starts
+    default: true
+  hearthstone.set:
+    description: Allow a player to set the home of any player.
+    children:
+      hearthstone.set.own: true
+      hearthstone.set.others: true
+  hearthstone.set.own:
+    description: Allow a player to set their own home
+    default: true
+  hearthstone.set.others:
+    description: Allow a player to set the homes of others.

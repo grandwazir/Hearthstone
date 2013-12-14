@@ -18,11 +18,8 @@
  ******************************************************************************/
 package name.richardson.james.bukkit.hearthstone.teleport;
 
-import java.text.MessageFormat;
 import java.util.Hashtable;
-import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -32,13 +29,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import name.richardson.james.bukkit.hearthstone.Home;
 import name.richardson.james.bukkit.utilities.formatters.ColourFormatter;
+import name.richardson.james.bukkit.utilities.formatters.DefaultColourFormatter;
+import name.richardson.james.bukkit.utilities.formatters.PreciseDurationTimeFormatter;
 import name.richardson.james.bukkit.utilities.formatters.TimeFormatter;
-import name.richardson.james.bukkit.utilities.localisation.Localised;
-import name.richardson.james.bukkit.utilities.localisation.ResourceBundles;
+import name.richardson.james.bukkit.utilities.localisation.Localisation;
+import name.richardson.james.bukkit.utilities.localisation.ResourceBundleByClassLocalisation;
 
-public class ScheduledTeleport implements Runnable, Localised {
+import name.richardson.james.bukkit.hearthstone.Home;
+
+//TODO This is a mixture of static and non-static and needs to be refactored at some point.
+public class ScheduledTeleport implements Runnable {
 
 	public static final int MOVEMENT_THRESHOLD = 2;
 	public static final Sound TELEPORT_FAILED_SOUND = Sound.ITEM_BREAK;
@@ -47,12 +48,20 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private static final BukkitScheduler BUKKIT_SCHEDULER = Bukkit.getScheduler();
 	private static final Map<String, Long> COOLDOWN_TRACKER = new Hashtable<String, Long>();
-	private static final ResourceBundle LOCALISATION = ResourceBundle.getBundle(ResourceBundles.MESSAGES.getBundleName());
+	private static final String TELEPORT_COOLDOWN_KEY = "teleport-cooldown";
+	private static final String PLAYER_MOVED_TOO_FAR_KEY = "player-moved-too-far";
+	private static final String PLAYER_TAKEN_DAMAGE_KEY = "error.player-taken-damage";
+	private static final String LOCATION_OBSTRUCTED_KEY = "location-obstructed";
+	private static final String TELEPORT_WARMUP_KEY = "teleport-warmup";
 
 	private static long cooldown = 0;
 	private static Plugin plugin = null;
 	private static long warmup = 0;
 	private static String warmupTime;
+
+	private final Localisation localisation = new ResourceBundleByClassLocalisation(ScheduledTeleport.class);
+	private final ColourFormatter colourFormatter = new DefaultColourFormatter();
+	private static final TimeFormatter timeFormatter = new PreciseDurationTimeFormatter();
 
 	public static Plugin getPlugin() {
 		if (ScheduledTeleport.plugin == null) {
@@ -67,7 +76,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	public static void setWarmupTime(final long milliseconds) {
 		ScheduledTeleport.warmup = milliseconds;
-		ScheduledTeleport.warmupTime = TimeFormatter.millisToLongDHMS(warmup);
+		ScheduledTeleport.warmupTime = timeFormatter.getHumanReadableDuration(warmup);
 	}
 
 	private final int health;
@@ -88,20 +97,6 @@ public class ScheduledTeleport implements Runnable, Localised {
 		}
 	}
 
-	public String getMessage(final String key) {
-		String message = LOCALISATION.getString(key);
-		message = ColourFormatter.replace(message);
-		return message;
-	}
-
-	public String getMessage(final String key, final Object... elements) {
-		final MessageFormat formatter = new MessageFormat(LOCALISATION.getString(key));
-		formatter.setLocale(Locale.getDefault());
-		String message = formatter.format(elements);
-		message = ColourFormatter.replace(message);
-		return message;
-	}
-
 	public void run() {
 		if (!(this.hasPlayerMoved()) && !(this.hasPlayerTakenDamage()) && !(this.isLocationObstructed())) {
 			this.player.getLocation().getWorld().playEffect(this.player.getLocation(), TELEPORT_SUCCESS_EFFECT, 0);
@@ -117,9 +112,10 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean hasCooldown() {
 		if (!COOLDOWN_TRACKER.containsKey(this.player.getName())) { return false; }
-		final long timeRemaining = COOLDOWN_TRACKER.get(this.player.getName()) - System.currentTimeMillis();
+		long timeRemaining = COOLDOWN_TRACKER.get(this.player.getName()) - System.currentTimeMillis();
+		timeRemaining = Math.round(timeRemaining / 1000) * 1000;
 		if (timeRemaining > 0) {
-			this.player.sendMessage(this.getMessage("error.teleport-cooldown", TimeFormatter.millisToLongDHMS(timeRemaining)));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(TELEPORT_COOLDOWN_KEY), ColourFormatter.FormatStyle.WARNING, timeFormatter.getHumanReadableDuration(timeRemaining)));
 			return true;
 		} else {
 			return false;
@@ -128,7 +124,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean hasPlayerMoved() {
 		if (this.player.getLocation().distance(this.lastLocation) >= MOVEMENT_THRESHOLD) {
-			this.player.sendMessage(this.getMessage("error.player-moved-too-far"));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(PLAYER_MOVED_TOO_FAR_KEY), ColourFormatter.FormatStyle.ERROR));
 			return true;
 		} else {
 			return false;
@@ -137,7 +133,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean hasPlayerTakenDamage() {
 		if (this.player.getHealth() < this.health) {
-			this.player.sendMessage(this.getMessage("error.player-taken-damage"));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(PLAYER_TAKEN_DAMAGE_KEY), ColourFormatter.FormatStyle.ERROR));
 			return true;
 		} else {
 			return false;
@@ -146,7 +142,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private boolean isLocationObstructed() {
 		if (this.home.isObstructed()) {
-			this.player.sendMessage(this.getMessage("error.location-obstructed"));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(LOCATION_OBSTRUCTED_KEY), ColourFormatter.FormatStyle.ERROR));
 			return true;
 		} else {
 			return false;
@@ -155,7 +151,7 @@ public class ScheduledTeleport implements Runnable, Localised {
 
 	private void schedule() {
 		if (this.player.hasPermission("hearthstone.teleport.warmup")) {
-			this.player.sendMessage(this.getMessage("notice.teleport-warmup", ScheduledTeleport.warmupTime));
+			this.player.sendMessage(colourFormatter.format(localisation.getMessage(TELEPORT_WARMUP_KEY), ColourFormatter.FormatStyle.INFO, ScheduledTeleport.warmupTime));
 			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(ScheduledTeleport.getPlugin(), this, ((ScheduledTeleport.warmup / 1000) * 20));
 		} else {
 			BUKKIT_SCHEDULER.scheduleSyncDelayedTask(plugin, this);
