@@ -40,6 +40,12 @@
            <artifactId>worldguard</artifactId>
            <version>5.7.3</version>
      </dependency>
+      <dependency>
+          <groupId>org.mcstats.bukkit</groupId>
+          <artifactId>metrics</artifactId>
+          <version>R6</version>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
   <build>
@@ -59,12 +65,17 @@
                   <artifactSet>
                     <includes>
                       <include>name.richardson.james.bukkit:bukkit-utilities</include>
+                      <include>org.mcstats.bukkit:metrics</include>
                     </includes>
                   </artifactSet>
                   <relocations>
                     <relocation>
                       <pattern>name.richardson.james.bukkit.utilities</pattern>
                       <shadedPattern>name.richardson.james.bukkit.hearthstone.utilities</shadedPattern>
+                    </relocation>
+                    <relocation>
+                        <pattern>org.mcstats</pattern>
+                        <shadedPattern>name.richardson.james.bukkit.starterkit.utilities.metrics</shadedPattern>
                     </relocation>
                   </relocations>
                   <minimizeJar>true</minimizeJar>

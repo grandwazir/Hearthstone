@@ -93,8 +93,8 @@ public class Hearthstone extends JavaPlugin {
 			this.loadDatabase();
 			this.initaliseWorldGuard();
 			this.registerCommands();
-			//TODO this.setupMetrics();
-			//TODO this.updatePlugin();
+			this.setupMetrics();
+			this.updatePlugin();
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -139,6 +139,14 @@ public class Hearthstone extends JavaPlugin {
 		CommandInvoker invoker = new FallthroughCommandInvoker(helpCommand);
 		invoker.addCommands(commandSet);
 		this.getCommand("home").setExecutor(invoker);
+	}
+
+
+	protected void setupMetrics()
+	throws IOException {
+		if (this.configuration.isCollectingStats()) {
+			new MetricsListener(this, this.getServer().getPluginManager(), this.database.find(HomeRecord.class).findRowCount());
+		}
 	}
 
 	private void updatePlugin() {
